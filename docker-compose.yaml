@@ -7,6 +7,12 @@ services:
       target: development
     volumes:
       - "./:/api"
+    environment:
+      - DB_USER=root
+      - DB_NAME=task-api
+      - DB_PASSWORD=password
+      - DB_HOST=mysql
+      - DB_PORT=3306
     ports:
       - "8080:8080"
     depends_on:

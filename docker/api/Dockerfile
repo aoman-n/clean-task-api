@@ -9,5 +9,6 @@ FROM base as development
 ENV GO_ENV=development
 EXPOSE 8080
 RUN go mod download \
-    && go get github.com/oxequa/realize
+    && go get github.com/oxequa/realize \
+    && go get bitbucket.org/liamstask/goose/cmd/goose
 ENTRYPOINT ["sh", "./entrypoint.sh"]
