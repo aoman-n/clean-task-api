@@ -2,4 +2,4 @@
 
 set -e
 
-GO_ENV=development realize start
+$GOPATH/bin/realize start

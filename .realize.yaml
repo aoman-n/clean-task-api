@@ -6,15 +6,18 @@ schema:
 - name: task-api
   path: .
   commands:
-    run:           # 追記
-      status: true # 追記
+    install:
+      status: true
+      method: go build -o tmp/server
+    run:
+      status: true
+      method: ./tmp/server
   watcher:
     extensions:
     - go
     paths:
     - /
-    ignore:
-      paths:
-      - .git
-      - .realize
-      - vendor
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor
