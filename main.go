@@ -6,6 +6,8 @@ import (
 	"task-api/src/config"
 	"task-api/src/infrastructure/db"
 	"task-api/src/infrastructure/router"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func main() {
@@ -13,7 +15,8 @@ func main() {
 
 	sqlhandler := db.NewSqlhandler()
 	defer sqlhandler.Close()
+	validator := validator.New()
 
-	r := router.Handler(sqlhandler)
+	r := router.Handler(sqlhandler, validator)
 	log.Fatal(http.ListenAndServe(":"+conf.Server.Port, r))
 }

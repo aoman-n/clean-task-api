@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"task-api/src/interfaces"
+	"task-api/src/usecase"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -20,11 +21,12 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Write([]byte("Hello, World"))
 }
 
-func Handler(sqlhandler interfaces.SQLHandler) *httprouter.Router {
-	userController := interfaces.NewUserController(sqlhandler)
+func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *httprouter.Router {
+	userController := interfaces.NewUserController(sqlhandler, validator)
 
 	router := httprouter.New()
 	router.GET("/users", logging(userController.Index))
+	router.POST("/users", logging(userController.Create))
 
 	return router
 }

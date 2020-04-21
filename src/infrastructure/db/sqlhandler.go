@@ -44,8 +44,9 @@ func connect() *sql.DB {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
-		os.Getenv("DB_DATABASE"),
+		os.Getenv("DB_NAME"),
 	)
+	fmt.Println("connection url: ", connectionURL)
 	db, err := sql.Open("mysql", connectionURL)
 
 	if err != nil {
