@@ -14,15 +14,16 @@ type userInteractor struct {
 
 type UserInteractor interface {
 	Store(UserStoreInputDS) (int64, error)
+	FindByLoginNameAndVerifyPassword(input UserLoginInputDS) (int64, error)
+}
+
+func NewUserInteractor(repo UserRepository, validator Validator) UserInteractor {
+	return &userInteractor{repo, validator}
 }
 
 type UserStoreInputDS struct {
 	LoginName string `json:"loginName"`
 	Password  string `json:"password"`
-}
-
-func NewUserInteractor(repo UserRepository, validator Validator) UserInteractor {
-	return &userInteractor{repo, validator}
 }
 
 func (ui *userInteractor) Store(input UserStoreInputDS) (id int64, err error) {
@@ -52,4 +53,21 @@ func (ui *userInteractor) User(id int) (user *model.User, err error) {
 	return
 }
 
-// bcrypt.CompareHashAndPassword(passB, []byte(data.Password))
+type UserLoginInputDS struct {
+	LoingName string `json:"loginName"`
+	Password  string `json:"password"`
+}
+
+func (ui *userInteractor) FindByLoginNameAndVerifyPassword(input UserLoginInputDS) (int64, error) {
+	user, err := ui.userRepository.FindByLoginName(input.LoingName)
+	if err != nil {
+		return 0, fmt.Errorf("not found user. loginName is %s", input.LoingName)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(input.Password))
+	if err != nil {
+		return 0, fmt.Errorf("password is invalid")
+	}
+
+	return user.ID, nil
+}

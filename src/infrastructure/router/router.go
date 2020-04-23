@@ -25,8 +25,10 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	userController := interfaces.NewUserController(sqlhandler, validator)
 
 	router := httprouter.New()
+	router.POST("/signup", logging(userController.Singup))
+	router.POST("/login", logging(userController.Login))
 	router.GET("/users", logging(userController.Index))
-	router.POST("/users", logging(userController.Create))
+	router.GET("/users/:id", logging(userController.Show))
 
 	return router
 }

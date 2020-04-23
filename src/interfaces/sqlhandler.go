@@ -3,7 +3,8 @@ package interfaces
 // A SQLHandler belong to the inteface layer.
 type SQLHandler interface {
 	Begin() (Tx, error)
-	Query(string, ...interface{}) (Row, error)
+	Query(string, ...interface{}) (Rows, error)
+	QueryRow(query string, args ...interface{}) Row
 	Exec(string, ...interface{}) (Result, error)
 	Close()
 }
@@ -22,9 +23,13 @@ type Result interface {
 }
 
 // A Row belong to the inteface layer.
-type Row interface {
+type Rows interface {
 	Scan(...interface{}) error
 	Next() bool
 	Close() error
 	Err() error
+}
+
+type Row interface {
+	Scan(...interface{}) error
 }

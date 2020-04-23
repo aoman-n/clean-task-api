@@ -6,7 +6,7 @@ CREATE TABLE users (
   `display_name` VARCHAR(32) NOT NULL,
   `login_name` VARCHAR(32) NOT NULL,
   `password_digest` VARCHAR(255) NOT NULL,
-  `avatar_url` VARCHAR(255) DEFAULT NULL,
+  `avatar_url` VARCHAR(255) DEFAULT "",
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE unique_index_users_on_login_name (login_name)

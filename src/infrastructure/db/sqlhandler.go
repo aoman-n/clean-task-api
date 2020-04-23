@@ -21,8 +21,12 @@ type Result struct {
 	Result sql.Result
 }
 
-type Row struct {
+type Rows struct {
 	Rows *sql.Rows
+}
+
+type Row struct {
+	Row *sql.Row
 }
 
 func NewSqlhandler() interfaces.SQLHandler {
@@ -39,7 +43,7 @@ func (s *SQLHandler) Close() {
 
 func connect() *sql.DB {
 	connectionURL := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
@@ -71,17 +75,26 @@ func (s *SQLHandler) Begin() (interfaces.Tx, error) {
 	return tx, nil
 }
 
-func (s *SQLHandler) Query(query string, args ...interface{}) (interfaces.Row, error) {
+func (s *SQLHandler) Query(query string, args ...interface{}) (interfaces.Rows, error) {
 	rows, err := s.Conn.Query(query, args...)
 
 	if err != nil {
 		return nil, err
 	}
 
-	row := &Row{}
+	row := &Rows{}
 	row.Rows = rows
 
 	return row, nil
+}
+
+func (s *SQLHandler) QueryRow(query string, args ...interface{}) interfaces.Row {
+	r := s.Conn.QueryRow(query, args...)
+
+	row := &Row{}
+	row.Row = r
+
+	return row
 }
 
 func (s *SQLHandler) Exec(query string, args ...interface{}) (interfaces.Result, error) {
@@ -132,18 +145,22 @@ func (r Result) RowsAffected() (int64, error) {
 	return r.Result.RowsAffected()
 }
 
-func (r Row) Scan(value ...interface{}) error {
+func (r Rows) Scan(value ...interface{}) error {
 	return r.Rows.Scan(value...)
 }
 
-func (r Row) Next() bool {
+func (r Rows) Next() bool {
 	return r.Rows.Next()
 }
 
-func (r Row) Close() error {
+func (r Rows) Close() error {
 	return r.Rows.Close()
 }
 
-func (r Row) Err() error {
+func (r Rows) Err() error {
 	return r.Rows.Err()
+}
+
+func (r Row) Scan(dest ...interface{}) error {
+	return r.Row.Scan(dest...)
 }
