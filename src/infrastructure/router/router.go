@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"task-api/src/infrastructure/middleware"
 	"task-api/src/interfaces"
 	"task-api/src/usecase"
 
@@ -22,13 +23,20 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *httprouter.Router {
+	middlewares := middleware.New(sqlhandler)
+
 	userController := interfaces.NewUserController(sqlhandler, validator)
+	projectController := interfaces.NewProjectController(sqlhandler, validator)
 
 	router := httprouter.New()
+	/* users API */
 	router.POST("/signup", logging(userController.Singup))
 	router.POST("/login", logging(userController.Login))
 	router.GET("/users", logging(userController.Index))
 	router.GET("/users/:id", logging(userController.Show))
+
+	/* projects API */
+	router.POST("/projects", logging(middlewares.Authenticate(projectController.Create)))
 
 	return router
 }

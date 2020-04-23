@@ -7,3 +7,5 @@ type Params interface {
 }
 
 type HttpHandler func(http.ResponseWriter, *http.Request, Params)
+
+type HttpHandlerWithUserID func(http.ResponseWriter, *http.Request, Params, int64)

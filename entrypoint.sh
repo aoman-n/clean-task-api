@@ -8,7 +8,7 @@ until mysqladmin ping -h ${DB_HOST} -P ${DB_PORT} --silent; do
 done
 echo "success to connect mysql."
 
-# $GOPATH/bin/goose up
+$GOPATH/bin/goose up
 echo "migrated."
 
 $GOPATH/bin/realize start
