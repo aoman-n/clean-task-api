@@ -9,6 +9,7 @@ import (
 type ProjectInteractor interface {
 	Store(*ProjectStoreInputDS) (int64, error)
 	GetList(*ProjectGetListInputDS) (model.ProjectResults, error)
+	Delete(*ProjectDeleteInputDS) error
 }
 
 type projectInteractor struct {
@@ -64,4 +65,22 @@ func (pi *projectInteractor) GetList(in *ProjectGetListInputDS) (model.ProjectRe
 	}
 
 	return projects, nil
+}
+
+type ProjectDeleteInputDS struct {
+	Uid       int64
+	ProjectID int
+}
+
+func (pi *projectInteractor) Delete(in *ProjectDeleteInputDS) error {
+	role, err := pi.ProjectRepository.RoleByProjectID(nil, in.Uid, in.ProjectID)
+	if err != nil {
+		return err
+	}
+
+	if role != model.Admin {
+		return errors.NewPermissionErr(fmt.Sprintf("%s cannot delete permission", role))
+	}
+
+	return pi.ProjectRepository.Delete(nil, in.ProjectID)
 }

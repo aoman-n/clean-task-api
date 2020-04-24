@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"task-api/src/interfaces"
 	"task-api/src/usecase"
@@ -22,8 +21,6 @@ func New(sqlhandler interfaces.SQLHandler) *Middlewares {
 
 func (m *Middlewares) Authenticate(h interfaces.HttpHandlerWithUserID) interfaces.HttpHandler {
 	return func(w http.ResponseWriter, r *http.Request, params interfaces.Params) {
-		fmt.Println("[ACCESS] ", r.Method, r.URL, r.Host, r.RequestURI)
-
 		token := auth.GetTokenFromHeader(r)
 		userId, err := auth.DecodeJWT(token)
 		if err != nil {

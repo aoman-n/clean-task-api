@@ -38,6 +38,7 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	/* projects API */
 	router.GET("/projects", logging(middlewares.Authenticate(projectController.Index)))
 	router.POST("/projects", logging(middlewares.Authenticate(projectController.Create)))
+	router.DELETE("/projects/:id", logging(middlewares.Authenticate(projectController.Delete)))
 
 	return router
 }

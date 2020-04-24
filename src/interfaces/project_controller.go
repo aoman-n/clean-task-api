@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"task-api/src/usecase"
 	"task-api/src/utils/errors"
 )
@@ -59,4 +60,27 @@ func (uc *ProjectController) Create(w http.ResponseWriter, r *http.Request, ps P
 	}
 
 	jsonView(w, 200, fmt.Sprintf("hello, project, id is %v", projectID))
+}
+
+func (uc *ProjectController) Delete(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
+	projectID, _ := strconv.Atoi(ps.ByName("id"))
+
+	err := uc.ProjectInteractor.Delete(&usecase.ProjectDeleteInputDS{
+		Uid:       uID,
+		ProjectID: projectID,
+	})
+
+	if err != nil {
+		switch err.(type) {
+		case *errors.NotFoundErr:
+			jsonView(w, 404, err)
+		case *errors.PermissionErr:
+			jsonView(w, 401, err)
+		default:
+			jsonView(w, 500, "server error")
+		}
+		return
+	}
+
+	jsonView(w, 204, "ok")
 }

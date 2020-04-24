@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"task-api/src/entity/model"
 	"task-api/src/usecase"
+	"task-api/src/utils/errors"
 )
 
 type projectRepository struct {
@@ -83,4 +84,29 @@ func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64
 	}
 
 	return projects, nil
+}
+
+func (repo *projectRepository) RoleByProjectID(tx usecase.Transaction, userID int64, projectID int) (string, error) {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	var role string
+	err := sqlhandler.
+		QueryRow("SELECT role FROM project_users WHERE user_id = ? AND project_id = ?", userID, projectID).
+		Scan(&role)
+	if err != nil {
+		return "", errors.NewNotFoundErr(fmt.Sprintf("user belongs to project not found. userId=%d, projectId=%d", userID, projectID))
+	}
+
+	return role, nil
+}
+
+func (repo *projectRepository) Delete(tx usecase.Transaction, projectID int) error {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	_, err := sqlhandler.Exec("DELETE FROM projects WHERE id = ?", projectID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
