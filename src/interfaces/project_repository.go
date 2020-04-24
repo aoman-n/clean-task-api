@@ -44,3 +44,43 @@ func (repo *projectRepository) AddUser(tx usecase.Transaction, userID int64, pro
 
 	return projectID, nil
 }
+
+func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64) (model.ProjectResults, error) {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	query := `
+	SELECT
+		projects.id,
+		projects.title,
+		projects.description,
+		project_users.role
+	FROM
+		projects
+	JOIN
+		project_users ON projects.id = project_users.project_id
+	WHERE
+		project_users.user_id = ?
+	`
+	rows, err := sqlhandler.Query(query, userID)
+	defer rows.Close()
+
+	if err != nil {
+		fmt.Println("FindByUserID error: ", err)
+		return nil, err
+	}
+
+	var projects model.ProjectResults
+	for rows.Next() {
+		var p model.ProjectResult
+		if err = rows.Scan(&p.ID, &p.Title, &p.Description, &p.Role); err != nil {
+			return nil, err
+		}
+		projects = append(projects, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return projects, nil
+}

@@ -8,6 +8,7 @@ import (
 
 type ProjectInteractor interface {
 	Store(*ProjectStoreInputDS) (int64, error)
+	GetList(*ProjectGetListInputDS) (model.ProjectResults, error)
 }
 
 type projectInteractor struct {
@@ -50,4 +51,17 @@ func (pi *projectInteractor) Store(in *ProjectStoreInputDS) (int64, error) {
 	}
 
 	return projectID.(int64), nil
+}
+
+type ProjectGetListInputDS struct {
+	Uid int64
+}
+
+func (pi *projectInteractor) GetList(in *ProjectGetListInputDS) (model.ProjectResults, error) {
+	projects, err := pi.ProjectRepository.FindByUserID(nil, in.Uid)
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }

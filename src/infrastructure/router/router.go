@@ -36,6 +36,7 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	router.GET("/users/:id", logging(userController.Show))
 
 	/* projects API */
+	router.GET("/projects", logging(middlewares.Authenticate(projectController.Index)))
 	router.POST("/projects", logging(middlewares.Authenticate(projectController.Create)))
 
 	return router

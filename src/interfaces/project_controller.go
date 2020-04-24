@@ -22,6 +22,17 @@ func NewProjectController(sqlhandler SQLHandler, validator usecase.Validator) *P
 	}
 }
 
+func (uc *ProjectController) Index(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
+	projects, err := uc.ProjectInteractor.GetList(&usecase.ProjectGetListInputDS{Uid: uID})
+	if err != nil {
+		fmt.Println("in project index, GetList error: ", err)
+		jsonView(w, 500, err.Error())
+		return
+	}
+
+	jsonView(w, 200, projects)
+}
+
 func (uc *ProjectController) Create(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
 
 	var data usecase.ProjectStoreInputDS
