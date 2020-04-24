@@ -10,12 +10,13 @@ type ProjectInteractor interface {
 }
 
 type projectInteractor struct {
-	UserRepository    UserRepository
-	ProjectRepository ProjectRepository
+	UserRepository     UserRepository
+	ProjectRepository  ProjectRepository
+	TransactionHandler TransactionHandler
 }
 
-func NewProjectInteractor(userRepo UserRepository, projectRepo ProjectRepository) ProjectInteractor {
-	return &projectInteractor{userRepo, projectRepo}
+func NewProjectInteractor(userRepo UserRepository, projectRepo ProjectRepository, transactionHandler TransactionHandler) ProjectInteractor {
+	return &projectInteractor{userRepo, projectRepo, transactionHandler}
 }
 
 type ProjectStoreInputDS struct {
@@ -25,23 +26,23 @@ type ProjectStoreInputDS struct {
 }
 
 func (pi *projectInteractor) Store(in *ProjectStoreInputDS) (int64, error) {
-
 	// TODO: バリデーション
 	project := &model.Project{Title: in.Title, Description: in.Description}
-	// TODO: トランザクション開始
-	projectID, err := pi.ProjectRepository.Create(project)
+
+	// トランザクション内で、project作成とアドミンUserとして参加させる処理
+	projectID, err := pi.TransactionHandler.TransactAndReturnData(func(tx Transaction) (interface{}, error) {
+		projectID, err := pi.ProjectRepository.Create(tx, project)
+		if err != nil {
+			return nil, err
+		}
+
+		return pi.ProjectRepository.AddUser(in.UserID, projectID, model.Admin)
+	})
+
 	if err != nil {
-		fmt.Println("Create error: ", err)
-		// TODO: rollback
-		return 0, nil
+		fmt.Println("Project Store error: ", err)
+		return 0, err
 	}
 
-	_, err = pi.ProjectRepository.AddUser(in.UserID, projectID, model.Admin)
-	if err != nil {
-		fmt.Println("AddUser error: ", err)
-		// TODO: rollback
-		return 0, nil
-	}
-
-	return projectID, nil
+	return projectID.(int64), nil
 }

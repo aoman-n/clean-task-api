@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"task-api/src/interfaces"
+	"task-api/src/usecase"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -65,16 +66,6 @@ func connect() *sql.DB {
 	return db
 }
 
-func (s *SQLHandler) Begin() (interfaces.Tx, error) {
-	t, err := s.Conn.Begin()
-	if err != nil {
-		return nil, err
-	}
-
-	tx := &Tx{t}
-	return tx, nil
-}
-
 func (s *SQLHandler) Query(query string, args ...interface{}) (interfaces.Rows, error) {
 	rows, err := s.Conn.Query(query, args...)
 
@@ -107,24 +98,40 @@ func (s *SQLHandler) Exec(query string, args ...interface{}) (interfaces.Result,
 	return result, nil
 }
 
-func (t Tx) Commit() error {
-	err := t.Tx.Commit()
-
+func (s *SQLHandler) TransactAndReturnData(txFunc func(usecase.Transaction) (interface{}, error)) (data interface{}, err error) {
+	tx, err := s.Conn.Begin()
 	if err != nil {
-		return err
+		return
 	}
-
-	return nil
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+	data, err = txFunc(&Tx{Tx: tx})
+	return
 }
 
-func (t Tx) Rollback() error {
-	err := t.Tx.Rollback()
+func (s *SQLHandler) Transactionable() {
+	return
+}
 
-	if err != nil {
-		return err
+func (s *SQLHandler) FromTransaction(tx usecase.Transaction) interfaces.SQLHandler {
+	sqlhandler, ok := tx.(*SQLHandler)
+	if !ok {
+		return s
 	}
 
-	return nil
+	return sqlhandler
+}
+
+func (t *Tx) Transactionable() {
+	return
 }
 
 func (t Tx) Exec(query string, args ...interface{}) (interfaces.Result, error) {

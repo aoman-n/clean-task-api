@@ -1,28 +1,22 @@
 package interfaces
 
-// A SQLHandler belong to the inteface layer.
+import "task-api/src/usecase"
+
 type SQLHandler interface {
-	Begin() (Tx, error)
 	Query(string, ...interface{}) (Rows, error)
 	QueryRow(query string, args ...interface{}) Row
 	Exec(string, ...interface{}) (Result, error)
 	Close()
+	TransactAndReturnData(txFunc func(usecase.Transaction) (interface{}, error)) (data interface{}, err error)
+	Transactionable()
+	FromTransaction(tx usecase.Transaction) SQLHandler
 }
 
-// A Tx belong to the inteface layer.
-type Tx interface {
-	Commit() error
-	Rollback() error
-	Exec(string, ...interface{}) (Result, error)
-}
-
-// A Result belong to the inteface layer.
 type Result interface {
 	LastInsertId() (int64, error)
 	RowsAffected() (int64, error)
 }
 
-// A Row belong to the inteface layer.
 type Rows interface {
 	Scan(...interface{}) error
 	Next() bool

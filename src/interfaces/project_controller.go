@@ -14,7 +14,7 @@ type ProjectController struct {
 func NewProjectController(sqlhandler SQLHandler, validator usecase.Validator) *ProjectController {
 	userRepository := NewUserRepository(sqlhandler)
 	projectRepository := NewProjectRepository(sqlhandler)
-	projectInteractor := usecase.NewProjectInteractor(userRepository, projectRepository)
+	projectInteractor := usecase.NewProjectInteractor(userRepository, projectRepository, sqlhandler)
 
 	return &ProjectController{
 		ProjectInteractor: projectInteractor,

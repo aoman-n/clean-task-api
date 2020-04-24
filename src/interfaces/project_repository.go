@@ -14,9 +14,11 @@ func NewProjectRepository(sqlhandler SQLHandler) usecase.ProjectRepository {
 	return &projectRepository{sqlhandler}
 }
 
-func (repo *projectRepository) Create(p *model.Project) (int64, error) {
+func (repo *projectRepository) Create(tx usecase.Transaction, p *model.Project) (int64, error) {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
 	qeury := `insert into projects (title, description) values (?, ?)`
-	result, err := repo.sqlhandler.Exec(qeury, p.Title, p.Description)
+	result, err := sqlhandler.Exec(qeury, p.Title, p.Description)
 	if err != nil {
 		fmt.Println("projcet creat error: ", err)
 		return 0, err
