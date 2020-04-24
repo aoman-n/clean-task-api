@@ -36,7 +36,7 @@ func (pi *projectInteractor) Store(in *ProjectStoreInputDS) (int64, error) {
 			return nil, err
 		}
 
-		return pi.ProjectRepository.AddUser(in.UserID, projectID, model.Admin)
+		return pi.ProjectRepository.AddUser(tx, in.UserID, projectID, model.Admin)
 	})
 
 	if err != nil {

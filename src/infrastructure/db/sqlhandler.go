@@ -10,36 +10,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type SQLHandler struct {
-	Conn *sql.DB
-}
-
-type Tx struct {
-	Tx *sql.Tx
-}
-
-type Result struct {
-	Result sql.Result
-}
-
-type Rows struct {
-	Rows *sql.Rows
-}
-
-type Row struct {
-	Row *sql.Row
-}
-
 func NewSqlhandler() interfaces.SQLHandler {
 	db := connect()
 
 	return &SQLHandler{
 		Conn: db,
 	}
-}
-
-func (s *SQLHandler) Close() {
-	s.Close()
 }
 
 func connect() *sql.DB {
@@ -66,30 +42,57 @@ func connect() *sql.DB {
 	return db
 }
 
+/* SQLHandler --------------- */
+// トランザクションのためにTxを持たせている
+// Txを保持している場合にはそれを使い、なければConnを使う
+type SQLHandler struct {
+	Conn *sql.DB
+	Tx   *sql.Tx
+}
+
+func (s *SQLHandler) Close() {
+	s.Close()
+}
+
+// Conn or Tx
 func (s *SQLHandler) Query(query string, args ...interface{}) (interfaces.Rows, error) {
-	rows, err := s.Conn.Query(query, args...)
+	var rows *sql.Rows
+	var err error
+
+	if s.Tx != nil {
+		rows, err = s.Tx.Query(query, args...)
+	} else {
+		rows, err = s.Conn.Query(query, args...)
+	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	row := &Rows{}
-	row.Rows = rows
-
-	return row, nil
+	return &Rows{Rows: rows}, nil
 }
 
+// Conn or Tx
 func (s *SQLHandler) QueryRow(query string, args ...interface{}) interfaces.Row {
-	r := s.Conn.QueryRow(query, args...)
+	var r *sql.Row
+	if s.Tx != nil {
+		r = s.Tx.QueryRow(query, args...)
+	} else {
+		r = s.Conn.QueryRow(query, args...)
+	}
 
-	row := &Row{}
-	row.Row = r
-
-	return row
+	return &Row{Row: r}
 }
 
+// Conn or Tx
 func (s *SQLHandler) Exec(query string, args ...interface{}) (interfaces.Result, error) {
-	result, err := s.Conn.Exec(query, args...)
+	var result sql.Result
+	var err error
+	if s.Tx != nil {
+		result, err = s.Tx.Exec(query, args...)
+	} else {
+		result, err = s.Conn.Exec(query, args...)
+	}
 
 	if err != nil {
 		return nil, err
@@ -100,6 +103,7 @@ func (s *SQLHandler) Exec(query string, args ...interface{}) (interfaces.Result,
 
 func (s *SQLHandler) TransactAndReturnData(txFunc func(usecase.Transaction) (interface{}, error)) (data interface{}, err error) {
 	tx, err := s.Conn.Begin()
+
 	if err != nil {
 		return
 	}
@@ -113,7 +117,8 @@ func (s *SQLHandler) TransactAndReturnData(txFunc func(usecase.Transaction) (int
 			err = tx.Commit()
 		}
 	}()
-	data, err = txFunc(&Tx{Tx: tx})
+	// トランザクションfieldをもたせてそのTxを使って処理をさせる
+	data, err = txFunc(&SQLHandler{Tx: tx})
 	return
 }
 
@@ -123,6 +128,7 @@ func (s *SQLHandler) Transactionable() {
 
 func (s *SQLHandler) FromTransaction(tx usecase.Transaction) interfaces.SQLHandler {
 	sqlhandler, ok := tx.(*SQLHandler)
+
 	if !ok {
 		return s
 	}
@@ -130,18 +136,9 @@ func (s *SQLHandler) FromTransaction(tx usecase.Transaction) interfaces.SQLHandl
 	return sqlhandler
 }
 
-func (t *Tx) Transactionable() {
-	return
-}
-
-func (t Tx) Exec(query string, args ...interface{}) (interfaces.Result, error) {
-	result, err := t.Tx.Exec(query, args...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+/* Result --------------- */
+type Result struct {
+	Result sql.Result
 }
 
 func (r Result) LastInsertId() (int64, error) {
@@ -150,6 +147,11 @@ func (r Result) LastInsertId() (int64, error) {
 
 func (r Result) RowsAffected() (int64, error) {
 	return r.Result.RowsAffected()
+}
+
+/* Rows --------------- */
+type Rows struct {
+	Rows *sql.Rows
 }
 
 func (r Rows) Scan(value ...interface{}) error {
@@ -166,6 +168,11 @@ func (r Rows) Close() error {
 
 func (r Rows) Err() error {
 	return r.Rows.Err()
+}
+
+/* Row --------------- */
+type Row struct {
+	Row *sql.Row
 }
 
 func (r Row) Scan(dest ...interface{}) error {
