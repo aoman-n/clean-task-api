@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"task-api/src/usecase"
+	"task-api/src/utils/errors"
 )
 
 type ProjectController struct {
@@ -14,7 +15,7 @@ type ProjectController struct {
 func NewProjectController(sqlhandler SQLHandler, validator usecase.Validator) *ProjectController {
 	userRepository := NewUserRepository(sqlhandler)
 	projectRepository := NewProjectRepository(sqlhandler)
-	projectInteractor := usecase.NewProjectInteractor(userRepository, projectRepository, sqlhandler)
+	projectInteractor := usecase.NewProjectInteractor(userRepository, projectRepository, sqlhandler, validator)
 
 	return &ProjectController{
 		ProjectInteractor: projectInteractor,
@@ -36,8 +37,14 @@ func (uc *ProjectController) Create(w http.ResponseWriter, r *http.Request, ps P
 	projectID, err := uc.ProjectInteractor.Store(&data)
 	if err != nil {
 		fmt.Println("in project create, store error: ", err)
-		jsonView(w, 500, "server error")
-		return
+		switch err.(type) {
+		case *errors.ModelValidationErr:
+			jsonView(w, 400, err.Error())
+			return
+		default:
+			jsonView(w, 500, err.Error())
+			return
+		}
 	}
 
 	jsonView(w, 200, fmt.Sprintf("hello, project, id is %v", projectID))
