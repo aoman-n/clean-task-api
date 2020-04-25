@@ -5,7 +5,7 @@ CREATE TABLE tasks (
   `id` INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `due_on` DATETIME DEFAULT NULL,
-  `status` VARCHAR(32) NOT NULL DEFAULT "waiting",
+  `status` TINYINT(1) NOT NULL DEFAULT 1,
   `project_id` INT(11) UNSIGNED NOT NULL,
   CONSTRAINT tasks_fk_project_id
     FOREIGN KEY (project_id)

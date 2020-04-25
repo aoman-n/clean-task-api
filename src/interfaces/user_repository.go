@@ -3,13 +3,14 @@ package interfaces
 import (
 	"fmt"
 	"task-api/src/entity/model"
+	"task-api/src/usecase"
 )
 
 type userRepository struct {
 	sqlhandler SQLHandler
 }
 
-func NewUserRepository(sqlhandler SQLHandler) *userRepository {
+func NewUserRepository(sqlhandler SQLHandler) usecase.UserRepository {
 	return &userRepository{sqlhandler}
 }
 
@@ -52,4 +53,36 @@ func (repo *userRepository) FindByLoginName(loginName string) (*model.User, erro
 
 	fmt.Println("in FindByLoginNmame user: ", user)
 	return &user, nil
+}
+
+func (repo *userRepository) FindByProjectID(projectID int) (*model.Users, error) {
+	query := `
+	SELECT users.id,users.login_name,users.display_name
+	FROM users
+	INNER JOIN project_users
+		ON users.id = project_users.user_id
+	WHERE project_users.project_id = ?
+	`
+	rows, err := repo.sqlhandler.Query(query, projectID)
+	defer rows.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var users model.Users
+	for rows.Next() {
+		var u model.User
+		if err := rows.Scan(&u.ID, &u.LoginName, &u.DisplayName); err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &users, nil
 }
