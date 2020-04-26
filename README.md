@@ -24,6 +24,7 @@
 
 - project_id(FK)
 - name
+- body(追加する)
 - due_on
 - status
   - wating

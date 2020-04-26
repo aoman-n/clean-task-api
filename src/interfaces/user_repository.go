@@ -86,3 +86,35 @@ func (repo *userRepository) FindByProjectID(projectID int) (*model.Users, error)
 
 	return &users, nil
 }
+
+func (repo *userRepository) FindLikeLoginName(loginName string) (model.Users, error) {
+	query := "SELECT * FROM users WHERE login_name LIKE '%" + loginName + "%'"
+
+	rows, err := repo.sqlhandler.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users model.Users
+	for rows.Next() {
+		var u model.User
+		err := rows.Scan(
+			&u.ID,
+			&u.DisplayName,
+			&u.LoginName,
+			&u.PasswordDigest,
+			&u.AvatarURL,
+			&u.CreatedAt,
+			&u.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, u)
+	}
+
+	return users, nil
+}

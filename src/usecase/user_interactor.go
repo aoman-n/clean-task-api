@@ -14,7 +14,8 @@ type userInteractor struct {
 
 type UserInteractor interface {
 	Store(UserStoreInputDS) (int64, error)
-	FindByLoginNameAndVerifyPassword(input UserLoginInputDS) (int64, error)
+	FindByLoginNameAndVerifyPassword(UserLoginInputDS) (int64, error)
+	Search(*UserSearchInputDS) (model.Users, error)
 }
 
 func NewUserInteractor(repo UserRepository, validator Validator) UserInteractor {
@@ -70,4 +71,17 @@ func (ui *userInteractor) FindByLoginNameAndVerifyPassword(input UserLoginInputD
 	}
 
 	return user.ID, nil
+}
+
+type UserSearchInputDS struct {
+	Q string
+}
+
+func (ui *userInteractor) Search(in *UserSearchInputDS) (model.Users, error) {
+	users, err := ui.userRepository.FindLikeLoginName(in.Q)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

@@ -21,9 +21,17 @@ func NewUserController(sqlhandler SQLHandler, validator usecase.Validator) *User
 	}
 }
 
-func (uc *UserController) Index(w http.ResponseWriter, _ *http.Request, ps Params) {
-	w.WriteHeader(200)
-	w.Write([]byte("hello, world!!!"))
+func (uc *UserController) Index(w http.ResponseWriter, r *http.Request, ps Params) {
+	q := r.URL.Query().Get("q")
+
+	users, err := uc.UserInteractor.Search(&usecase.UserSearchInputDS{Q: q})
+	if err != nil {
+		fmt.Println("user search error: ", err)
+		jsonView(w, 500, "Internal Server Error")
+		return
+	}
+
+	jsonView(w, 200, map[string]interface{}{"users": users})
 }
 
 func (uc *UserController) Show(w http.ResponseWriter, r *http.Request, ps Params) {
