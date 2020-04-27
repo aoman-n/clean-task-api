@@ -6,7 +6,8 @@ services:
       dockerfile: ./docker/api/Dockerfile
       target: development
     volumes:
-      - "./:/api"
+      - ./:/api
+      - exclude:/api/front
     environment:
       - DB_USER=root
       - DB_NAME=task-api
@@ -30,4 +31,6 @@ services:
       - MYSQL_ROOT_PASSWORD=password
 volumes:
   mysql_db:
+    driver: local
+  exclude:
     driver: local
