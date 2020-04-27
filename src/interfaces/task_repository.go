@@ -67,3 +67,50 @@ func (repo *taskRepository) Save(tx usecase.Transaction, t *model.Task) (int64, 
 
 	return t.ID, nil
 }
+
+func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) (*model.Tasks, error) {
+	sqlhandler := repo.FromTransaction(tx)
+
+	rows, err := sqlhandler.Query(`SELECT * FROM tasks WHERE project_id=?`, pID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks model.Tasks
+	for rows.Next() {
+		var t model.Task
+		err := rows.Scan(&t.ID, &t.Name, &t.DueOn, &t.Status, &t.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, t)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &tasks, nil
+}
+
+func (repo *taskRepository) Delete(tx usecase.Transaction, tID int) error {
+	sqlhandler := repo.FromTransaction(tx)
+
+	result, err := sqlhandler.Exec(`DELETE FROM tasks WHERE id=?`, tID)
+	if err != nil {
+		return err
+	}
+
+	affect, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affect != 1 {
+		return fmt.Errorf("Weird  Behavior. Total Affected: %d", affect)
+	}
+
+	return nil
+}

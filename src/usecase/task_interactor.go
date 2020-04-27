@@ -9,6 +9,8 @@ import (
 type TaskInteractor interface {
 	Store(*TaskStoreInputDS) (int64, error)
 	Update(*TaskUpdateInputDS) (*model.Task, error)
+	GetList(*TaskGetListInputDS) (*model.Tasks, error)
+	Delete(*TaskDeleteInputDS) error
 }
 
 type taskInteractor struct {
@@ -21,6 +23,14 @@ type taskInteractor struct {
 
 func NewTastInteractor(transactionHandler TransactionHandler, taskRepo TaskRepository, validator Validator) TaskInteractor {
 	return &taskInteractor{transactionHandler, taskRepo, validator}
+}
+
+type TaskGetListInputDS struct {
+	ProjectID int
+}
+
+func (ti *taskInteractor) GetList(in *TaskGetListInputDS) (*model.Tasks, error) {
+	return ti.taskRepository.FetchByProjectID(nil, in.ProjectID)
 }
 
 type TaskStoreInputDS struct {
@@ -83,4 +93,22 @@ func (ti *taskInteractor) Update(in *TaskUpdateInputDS) (*model.Task, error) {
 	}
 
 	return task, nil
+}
+
+type TaskDeleteInputDS struct {
+	TaskID int
+}
+
+func (ti *taskInteractor) Delete(in *TaskDeleteInputDS) error {
+	_, err := ti.taskRepository.FindByID(nil, in.TaskID)
+	if err != nil {
+		return err
+	}
+
+	err = ti.taskRepository.Delete(nil, in.TaskID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -20,6 +20,24 @@ func NewTaskController(sqlhandler SQLHandler, validator usecase.Validator) *task
 	return &taskController{taskInteractor}
 }
 
+func (con *taskController) Index(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
+	projectID, err := strconv.Atoi(ps.ByName("id"))
+	if err != nil {
+		fmt.Println("id must be integer err: ", err)
+		jsonView(w, 400, "bad request id must be integer")
+		return
+	}
+
+	tasks, err := con.taskInteractor.GetList(&usecase.TaskGetListInputDS{ProjectID: projectID})
+	if err != nil {
+		fmt.Println("usecase GetList error: ", err)
+		jsonView(w, 500, "Internal server error")
+		return
+	}
+
+	jsonView(w, 200, map[string]interface{}{"tasks": tasks})
+}
+
 func (con *taskController) Create(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
 	projectID, _ := strconv.Atoi(ps.ByName("id"))
 
@@ -54,9 +72,8 @@ func (con *taskController) Update(w http.ResponseWriter, r *http.Request, ps Par
 		jsonView(w, 400, "bad request")
 		return
 	}
-	fmt.Printf("data, Name: %v, Status: %v", *data.Name, *data.Status)
-	data.TaskID = taskID
 
+	data.TaskID = taskID
 	updatedTask, err := con.taskInteractor.Update(&data)
 	if err != nil {
 		fmt.Println("task usecase update error: ", err)
@@ -70,4 +87,27 @@ func (con *taskController) Update(w http.ResponseWriter, r *http.Request, ps Par
 	}
 
 	jsonView(w, 200, map[string]interface{}{"task": updatedTask})
+}
+
+func (con *taskController) Delete(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
+	taskID, err := strconv.Atoi(ps.ByName("task_id"))
+	if err != nil {
+		fmt.Println("id must be integer err: ", err)
+		jsonView(w, 400, "bad request id must be integer")
+		return
+	}
+
+	err = con.taskInteractor.Delete(&usecase.TaskDeleteInputDS{TaskID: taskID})
+	if err != nil {
+		fmt.Println("usecase Delete error: ", err)
+		switch err.(type) {
+		case *errors.NotFoundErr:
+			jsonView(w, 404, err.Error())
+		default:
+			jsonView(w, 500, "Internal server error")
+		}
+		return
+	}
+
+	jsonView(w, 204, nil)
 }
