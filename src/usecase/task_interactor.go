@@ -8,6 +8,7 @@ import (
 
 type TaskInteractor interface {
 	Store(*TaskStoreInputDS) (int64, error)
+	Update(*TaskUpdateInputDS) (*model.Task, error)
 }
 
 type taskInteractor struct {
@@ -45,4 +46,41 @@ func (ti *taskInteractor) Store(in *TaskStoreInputDS) (int64, error) {
 	}
 
 	return id, nil
+}
+
+type TaskUpdateInputDS struct {
+	TaskID int
+	Name   *string `json:"name"`
+	Status *int    `json:"status"`
+}
+
+func (ti *taskInteractor) Update(in *TaskUpdateInputDS) (*model.Task, error) {
+
+	// updateするタスクを取得する
+	task, err := ti.taskRepository.FindByID(nil, in.TaskID)
+	if err != nil {
+		return nil, err
+	}
+
+	// updateする項目を書き換える
+	if in.Name != nil {
+		task.Name = *in.Name
+	}
+	if in.Status != nil {
+		task.Status = *in.Status
+	}
+
+	// validation
+	err = ti.validator.Struct(*task)
+	if err != nil {
+		return nil, errors.NewModelValidationErr(err.Error())
+	}
+
+	// update
+	_, err = ti.taskRepository.Save(nil, task)
+	if err != nil {
+		return nil, errors.NewRecordSaveErr(err.Error())
+	}
+
+	return task, nil
 }

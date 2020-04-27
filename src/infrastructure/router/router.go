@@ -17,11 +17,6 @@ func logging(h interfaces.HttpHandler) httprouter.Handle {
 	}
 }
 
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.WriteHeader(200)
-	w.Write([]byte("Hello, World"))
-}
-
 func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *httprouter.Router {
 	middlewares := middleware.New(sqlhandler)
 
@@ -42,7 +37,8 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	router.DELETE("/projects/:id", logging(middlewares.Authenticate(projectController.Delete)))
 
 	/* task API */
-	router.POST("/projects/:id/tasks", logging(middlewares.Authenticate(middlewares.RequiredJoinedProject(taskController.Create))))
+	router.POST("/projects/:id/tasks", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(taskController.Create))))
+	router.PUT("/projects/:id/tasks/:task_id", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(taskController.Update))))
 
 	return router
 }

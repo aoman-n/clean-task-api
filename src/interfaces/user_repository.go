@@ -55,9 +55,9 @@ func (repo *userRepository) FindByLoginName(loginName string) (*model.User, erro
 	return &user, nil
 }
 
-func (repo *userRepository) FindByProjectID(projectID int) (*model.Users, error) {
+func (repo *userRepository) FindByProjectID(projectID int) (*model.UserList, error) {
 	query := `
-	SELECT users.id,users.login_name,users.display_name
+	SELECT users.id,users.login_name,users.display_name,users.avatar_url,project_users.role
 	FROM users
 	INNER JOIN project_users
 		ON users.id = project_users.user_id
@@ -70,10 +70,10 @@ func (repo *userRepository) FindByProjectID(projectID int) (*model.Users, error)
 		return nil, err
 	}
 
-	var users model.Users
+	var users model.UserList
 	for rows.Next() {
-		var u model.User
-		if err := rows.Scan(&u.ID, &u.LoginName, &u.DisplayName); err != nil {
+		var u model.UserListItem
+		if err := rows.Scan(&u.ID, &u.LoginName, &u.DisplayName, &u.AvatarURL, &u.Role); err != nil {
 			return nil, err
 		}
 
