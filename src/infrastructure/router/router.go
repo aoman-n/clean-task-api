@@ -23,6 +23,7 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	userController := interfaces.NewUserController(sqlhandler, validator)
 	projectController := interfaces.NewProjectController(sqlhandler, validator)
 	taskController := interfaces.NewTaskController(sqlhandler, validator)
+	tagController := interfaces.NewTagController(sqlhandler, validator)
 
 	router := httprouter.New()
 	/* users API */
@@ -41,6 +42,10 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	router.POST("/projects/:id/tasks", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(taskController.Create))))
 	router.DELETE("/projects/:id/tasks/:task_id", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(taskController.Delete))))
 	router.PUT("/projects/:id/tasks/:task_id", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(taskController.Update))))
+
+	/* tags API */
+	router.GET("/projects/:id/tags", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(tagController.Index))))
+	router.POST("/projects/:id/tags", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(tagController.Create))))
 
 	return router
 }
