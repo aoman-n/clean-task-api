@@ -4,7 +4,7 @@ type ProjectUser struct {
 	ID        int64  `json:"id"`
 	UserID    int64  `json:"user_id"`
 	ProjectID int64  `json:"project_id"`
-	Role      string `json:"role"` // admin, write, read
+	Role      string `json:"role" validate:"oneof=admin write read"` // admin, write, read
 }
 
 // Role constants

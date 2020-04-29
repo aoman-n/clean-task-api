@@ -1,8 +1,10 @@
 package interfaces
 
 import (
+	"fmt"
 	"task-api/src/entity/model"
 	"task-api/src/usecase"
+	"task-api/src/utils/errors"
 )
 
 type tagRepository struct {
@@ -58,6 +60,47 @@ func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID in
 	return &tags, nil
 }
 
-func (repo *tagRepository) Save(tx usecase.Transaction, t *model.Tag) (*model.Tag, error) {
-	return nil, nil
+func (repo *tagRepository) Save(tx usecase.Transaction, t *model.Tag) error {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	query := `UPDATE tags SET name=?,color=? WHERE id=?`
+	result, err := sqlhandler.Exec(query, t.Name, t.Color, t.ID)
+	if err != nil {
+		return errors.NewRecordSaveErr(err.Error())
+	}
+	affect, err := result.RowsAffected()
+	if err != nil {
+		return errors.NewRecordSaveErr(err.Error())
+	}
+	if affect != 1 {
+		return errors.NewRecordSaveErr(err.Error())
+	}
+
+	return nil
+}
+
+func (repo *tagRepository) FindByID(tx usecase.Transaction, id int) (*model.Tag, error) {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	var tag model.Tag
+	err := sqlhandler.
+		QueryRow(`SELECT * FROM tags WHERE id=?`, id).
+		Scan(&tag.ID, &tag.Name, &tag.Color, &tag.ProjectID)
+
+	if err != nil {
+		return nil, errors.NewNotFoundErr(fmt.Sprintf("not found tag. id=%d", id))
+	}
+
+	return &tag, nil
+}
+
+func (repo *tagRepository) Delete(tx usecase.Transaction, id int) error {
+	sqlhandler := repo.sqlhandler.FromTransaction(tx)
+
+	_, err := sqlhandler.Exec(`DELETE FROM tags WHERE id=?`, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

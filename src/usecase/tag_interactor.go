@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"task-api/src/entity/model"
 	"task-api/src/utils/errors"
 )
@@ -8,18 +9,27 @@ import (
 type tagInteractor struct {
 	transactionHandler TransactionHandler
 	tagRepository      TagRepository
+	projectRepository  ProjectRepository
 	validator          Validator
 }
 
 type TagInteractor interface {
 	Create(*TagCreateInputDS) (int64, error)
 	GetList(*TagGetListInputDS) (*model.Tags, error)
+	Delete(*TagDeleteInputDS) error
+	Update(*TagUpdateInputDS) (*model.Tag, error)
 }
 
-func NewTagInteractor(txHandler TransactionHandler, tagRepo TagRepository, validator Validator) TagInteractor {
+func NewTagInteractor(
+	txHandler TransactionHandler,
+	tagRepo TagRepository,
+	pRepo ProjectRepository,
+	validator Validator,
+) TagInteractor {
 	return &tagInteractor{
 		transactionHandler: txHandler,
 		tagRepository:      tagRepo,
+		projectRepository:  pRepo,
 		validator:          validator,
 	}
 }
@@ -64,16 +74,80 @@ func (ti *tagInteractor) GetList(in *TagGetListInputDS) (*model.Tags, error) {
 }
 
 type TagUpdateInputDS struct {
-	ProjectID int
-	UserID    int
+	Name   *string `json:"name"`
+	Color  *string `json:"color"`
+	TagID  int
+	UserID int64
 }
 
 func (ti *tagInteractor) Update(in *TagUpdateInputDS) (*model.Tag, error) {
 
 	// tagの存在確認
-	// role確認
-	// tagのvalidation
-	// tagのUpdate
+	tag, err := ti.tagRepository.FindByID(nil, in.TagID)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	// role確認
+	role, err := ti.projectRepository.RoleByProjectID(nil, in.UserID, tag.ProjectID)
+	if err != nil {
+		return nil, err
+	}
+	if role == model.Read {
+		msg := fmt.Sprintf("not permission to project id %v", tag.ProjectID)
+		return nil, errors.NewPermissionErr(msg)
+	}
+
+	// update値のセット
+	if in.Name != nil {
+		tag.Name = *in.Name
+	}
+	if in.Color != nil {
+		tag.Color = *in.Color
+	}
+	// tagのvalidation
+	err = ti.validator.Struct(tag)
+	if err != nil {
+		return nil, errors.NewModelValidationErr(err.Error())
+	}
+
+	// tagのUpdate
+	err = ti.tagRepository.Save(nil, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return tag, nil
+}
+
+type TagDeleteInputDS struct {
+	TagID  int
+	UserID int64
+}
+
+func (ti *tagInteractor) Delete(in *TagDeleteInputDS) error {
+
+	// tagの存在確認
+	tag, err := ti.tagRepository.FindByID(nil, in.TagID)
+	if err != nil {
+		return errors.NewNotFoundErr(err.Error())
+	}
+
+	// role確認
+	role, err := ti.projectRepository.RoleByProjectID(nil, in.UserID, tag.ProjectID)
+	if err != nil {
+		return err
+	}
+	if role == model.Read {
+		msg := fmt.Sprintf("not permission to project id %v", tag.ProjectID)
+		return errors.NewPermissionErr(msg)
+	}
+
+	// 削除
+	err = ti.tagRepository.Delete(nil, in.TagID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

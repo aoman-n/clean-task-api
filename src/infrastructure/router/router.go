@@ -46,6 +46,8 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *htt
 	/* tags API */
 	router.GET("/projects/:id/tags", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(tagController.Index))))
 	router.POST("/projects/:id/tags", logging(middlewares.Authenticate(middlewares.RequiredWriteRole(tagController.Create))))
+	router.PUT("/tags/:id", logging(middlewares.Authenticate(tagController.Update)))
+	router.DELETE("/tags/:id", logging(middlewares.Authenticate(tagController.Delete)))
 
 	return router
 }
