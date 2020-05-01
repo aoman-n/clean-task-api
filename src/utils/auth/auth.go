@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -59,7 +58,7 @@ func DecodeJWT(token string) (int64, error) {
 	return int64(userID), nil
 }
 
-func GetTokenFromHeader(r *http.Request) string {
-	bearer := r.Header.Get("Authorization")
+func GetTokenFromHeader(bearer string) string {
+	// bearer := r.Header.Get("Authorization")
 	return strings.Replace(bearer, "Bearer ", "", 1)
 }

@@ -1,9 +1,7 @@
 package interfaces
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"task-api/src/usecase"
 	"task-api/src/utils/errors"
@@ -23,24 +21,25 @@ func NewProjectController(sqlhandler SQLHandler, validator usecase.Validator) *P
 	}
 }
 
-func (uc *ProjectController) Index(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
+func (uc *ProjectController) Index(c Context) {
+	uID := c.MustGet("userId").(int64)
 	projects, err := uc.ProjectInteractor.GetList(&usecase.ProjectGetListInputDS{Uid: uID})
 	if err != nil {
 		fmt.Println("in project index, GetList error: ", err)
-		jsonView(w, 500, err.Error())
+		c.JSON(500, err.Error(), nil)
 		return
 	}
 
-	jsonView(w, 200, projects)
+	c.JSON(200, "ok", projects)
 }
 
-func (uc *ProjectController) Create(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-
+func (uc *ProjectController) Create(c Context) {
+	uID := c.MustGet("userId").(int64)
 	var data usecase.ProjectStoreInputDS
 	data.UserID = uID
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := c.Bind(&data); err != nil {
 		fmt.Println("in project create, decode error: ", err)
-		jsonView(w, 400, "bad request")
+		c.JSON(500, err.Error(), nil)
 		return
 	}
 
@@ -51,19 +50,20 @@ func (uc *ProjectController) Create(w http.ResponseWriter, r *http.Request, ps P
 		fmt.Println("in project create, store error: ", err)
 		switch err.(type) {
 		case *errors.ModelValidationErr:
-			jsonView(w, 400, err.Error())
+			c.JSON(400, err.Error(), nil)
 			return
 		default:
-			jsonView(w, 500, err.Error())
+			c.JSON(500, err.Error(), nil)
 			return
 		}
 	}
 
-	jsonView(w, 200, fmt.Sprintf("hello, project, id is %v", projectID))
+	c.JSON(201, "created", map[string]int64{"id": projectID})
 }
 
-func (uc *ProjectController) Delete(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-	projectID, _ := strconv.Atoi(ps.ByName("id"))
+func (uc *ProjectController) Delete(c Context) {
+	uID := c.MustGet("userId").(int64)
+	projectID, _ := strconv.Atoi(c.Param("id"))
 
 	err := uc.ProjectInteractor.Delete(&usecase.ProjectDeleteInputDS{
 		Uid:       uID,
@@ -73,14 +73,14 @@ func (uc *ProjectController) Delete(w http.ResponseWriter, r *http.Request, ps P
 	if err != nil {
 		switch err.(type) {
 		case *errors.NotFoundErr:
-			jsonView(w, 404, err)
+			c.JSON(404, err.Error(), nil)
 		case *errors.PermissionErr:
-			jsonView(w, 401, err)
+			c.JSON(401, err.Error(), nil)
 		default:
-			jsonView(w, 500, "server error")
+			c.JSON(500, "Internal server error", nil)
 		}
 		return
 	}
 
-	jsonView(w, 204, "ok")
+	c.JSON(204, "deleted", nil)
 }

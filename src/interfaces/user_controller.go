@@ -21,31 +21,29 @@ func NewUserController(sqlhandler SQLHandler, validator usecase.Validator) *User
 	}
 }
 
-func (uc *UserController) Index(w http.ResponseWriter, r *http.Request, ps Params) {
-	q := r.URL.Query().Get("q")
+func (uc *UserController) Index(c Context) {
+	q := c.Query("q")
 
 	users, err := uc.UserInteractor.Search(&usecase.UserSearchInputDS{Q: q})
 	if err != nil {
 		fmt.Println("user search error: ", err)
-		jsonView(w, 500, "Internal Server Error")
+		c.JSON(500, "Internal Server Error", nil)
 		return
 	}
 
-	jsonView(w, 200, map[string]interface{}{"users": users})
+	c.JSON(200, "ok", users)
 }
 
-func (uc *UserController) Show(w http.ResponseWriter, r *http.Request, ps Params) {
-	id := ps.ByName("id")
-	fmt.Println("id: ", id)
-	jwtToken := auth.GetTokenFromHeader(r)
+func (uc *UserController) Show(c Context) {
+	jwtToken := auth.GetTokenFromHeader(c.Header("Authorization"))
 	userID, err := auth.DecodeJWT(jwtToken)
 	if err != nil {
 		fmt.Println("err: ", err)
-		jsonView(w, 500, "error")
+		c.JSON(500, err.Error(), nil)
 		return
 	}
 
-	jsonView(w, 200, userID)
+	c.JSON(200, "ok", map[string]interface{}{"userId": userID})
 }
 
 type ErrorRes struct {
@@ -57,52 +55,50 @@ type OkRes struct {
 	Token string `json:"token"`
 }
 
-func (uc *UserController) Singup(w http.ResponseWriter, r *http.Request, ps Params) {
+func (uc *UserController) Singup(c Context) {
 	var data usecase.UserStoreInputDS
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := c.Bind(&data); err != nil {
 		fmt.Println("failed to decode. err: ", err)
-		jsonView(w, 400, ErrorRes{"error"})
+		c.JSON(400, err.Error(), nil)
 		return
 	}
 
 	id, err := uc.UserInteractor.Store(data)
 	if err != nil {
-		jsonView(w, 400, ErrorRes{"error"})
+		c.JSON(400, err.Error(), nil)
 		return
 	}
 
 	token, _ := auth.NewJWT(id)
 
-	jsonView(w, 200, OkRes{Id: id, Token: token})
+	c.JSON(200, "ok", OkRes{Id: id, Token: token})
 }
 
 // Params: loginName, password
 // Return: id, jwtToken
-func (uc *UserController) Login(w http.ResponseWriter, r *http.Request, ps Params) {
+func (uc *UserController) Login(c Context) {
 	var input usecase.UserLoginInputDS
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	if err := c.Bind(&input); err != nil {
 		fmt.Println("failed to decode. err: ", err)
-		jsonView(w, 400, ErrorRes{"error"})
+		c.JSON(400, "bad request", nil)
 		return
 	}
-	fmt.Println("in controller, input: ", input)
 
 	userID, err := uc.UserInteractor.FindByLoginNameAndVerifyPassword(input)
 	if err != nil {
 		fmt.Println("in controller, user: ", userID)
-		jsonView(w, 400, ErrorRes{"error"})
+		c.JSON(500, "bad request", err.Error())
 		return
 	}
-	fmt.Println("user: ", userID)
 
 	token, err := auth.NewJWT(userID)
 	if err != nil {
 		fmt.Println("in controller, user: ", userID)
-		jsonView(w, 500, ErrorRes{"error"})
+		c.JSON(500, err.Error(), nil)
 		return
 	}
 
-	jsonView(w, 200, OkRes{Id: userID, Token: token})
+	c.JSON(200, "ok", OkRes{Id: userID, Token: token})
 }
 
 func jsonView(w http.ResponseWriter, code int, v interface{}) error {

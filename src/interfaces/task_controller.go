@@ -1,7 +1,6 @@
 package interfaces
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -20,30 +19,30 @@ func NewTaskController(sqlhandler SQLHandler, validator usecase.Validator) *task
 	return &taskController{taskInteractor}
 }
 
-func (con *taskController) Index(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-	projectID, err := strconv.Atoi(ps.ByName("id"))
+func (con *taskController) Index(c Context) {
+	projectID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("id must be integer err: ", err)
-		jsonView(w, 400, "bad request id must be integer")
+		c.JSON(400, "bad request id must be integer", nil)
 		return
 	}
 
 	tasks, err := con.taskInteractor.GetList(&usecase.TaskGetListInputDS{ProjectID: projectID})
 	if err != nil {
 		fmt.Println("usecase GetList error: ", err)
-		jsonView(w, 500, "Internal server error")
+		c.JSON(500, "Internal server error", nil)
 		return
 	}
 
-	jsonView(w, 200, map[string]interface{}{"tasks": tasks})
+	c.JSON(http.StatusOK, "ok", tasks)
 }
 
-func (con *taskController) Create(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-	projectID, _ := strconv.Atoi(ps.ByName("id"))
+func (con *taskController) Create(c Context) {
+	projectID, _ := strconv.Atoi(c.Param("id"))
 
 	var data usecase.TaskStoreInputDS
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		jsonView(w, 400, "bad request")
+	if err := c.Bind(&data); err != nil {
+		c.JSON(400, "bad request", nil)
 		return
 	}
 
@@ -53,23 +52,23 @@ func (con *taskController) Create(w http.ResponseWriter, r *http.Request, ps Par
 		fmt.Println("task usecase store error: ", err)
 		switch err.(type) {
 		case *errors.ModelValidationErr:
-			jsonView(w, 400, err.Error())
+			c.JSON(400, err.Error(), nil)
 		default:
-			jsonView(w, 500, err.Error())
+			c.JSON(500, err.Error(), nil)
 		}
 		return
 	}
 
-	jsonView(w, 200, map[string]interface{}{"id": id})
+	c.JSON(200, "ok", map[string]interface{}{"id": id})
 }
 
-func (con *taskController) Update(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-	taskID, _ := strconv.Atoi(ps.ByName("task_id"))
+func (con *taskController) Update(c Context) {
+	taskID, _ := strconv.Atoi(c.Param("task_id"))
 
 	var data usecase.TaskUpdateInputDS
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	if err := c.Bind(&data); err != nil {
 		fmt.Println("data decode error: ", err)
-		jsonView(w, 400, "bad request")
+		c.JSON(400, err.Error(), nil)
 		return
 	}
 
@@ -79,21 +78,21 @@ func (con *taskController) Update(w http.ResponseWriter, r *http.Request, ps Par
 		fmt.Println("task usecase update error: ", err)
 		switch err.(type) {
 		case *errors.ModelValidationErr:
-			jsonView(w, 400, err.Error())
+			c.JSON(400, err.Error(), nil)
 		default:
-			jsonView(w, 500, err.Error())
+			c.JSON(500, err.Error(), nil)
 		}
 		return
 	}
 
-	jsonView(w, 200, map[string]interface{}{"task": updatedTask})
+	c.JSON(200, "ok", map[string]interface{}{"task": updatedTask})
 }
 
-func (con *taskController) Delete(w http.ResponseWriter, r *http.Request, ps Params, uID int64) {
-	taskID, err := strconv.Atoi(ps.ByName("task_id"))
+func (con *taskController) Delete(c Context) {
+	taskID, err := strconv.Atoi(c.Param("task_id"))
 	if err != nil {
 		fmt.Println("id must be integer err: ", err)
-		jsonView(w, 400, "bad request id must be integer")
+		c.JSON(400, "bad request id must be integer", nil)
 		return
 	}
 
@@ -102,12 +101,12 @@ func (con *taskController) Delete(w http.ResponseWriter, r *http.Request, ps Par
 		fmt.Println("usecase Delete error: ", err)
 		switch err.(type) {
 		case *errors.NotFoundErr:
-			jsonView(w, 404, err.Error())
+			c.JSON(404, err.Error(), nil)
 		default:
-			jsonView(w, 500, "Internal server error")
+			c.JSON(500, "Internal server error", nil)
 		}
 		return
 	}
 
-	jsonView(w, 204, nil)
+	c.JSON(204, "ok", nil)
 }
