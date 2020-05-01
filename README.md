@@ -44,12 +44,13 @@
 - task_id(FK)
 - body
 
-### Project_tags
+### task_tags
 
-- project_id(FK)
-- tag_id(FK)
+- task_id(FK)
+- tag_id
 
 ### Tags
 
+- project_id(FK)
 - name
 - color
