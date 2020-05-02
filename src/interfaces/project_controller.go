@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"task-api/src/usecase"
 	"task-api/src/utils/errors"
@@ -48,14 +49,9 @@ func (uc *ProjectController) Create(c Context) {
 	projectID, err := uc.ProjectInteractor.Store(&data)
 	if err != nil {
 		fmt.Println("in project create, store error: ", err)
-		switch err.(type) {
-		case *errors.ModelValidationErr:
-			c.JSON(400, err.Error(), nil)
-			return
-		default:
-			c.JSON(500, err.Error(), nil)
-			return
-		}
+		code, msg := uc.errStatus(err)
+		c.JSON(code, msg, nil)
+		return
 	}
 
 	c.JSON(201, "created", map[string]int64{"id": projectID})
@@ -71,16 +67,24 @@ func (uc *ProjectController) Delete(c Context) {
 	})
 
 	if err != nil {
-		switch err.(type) {
-		case *errors.NotFoundErr:
-			c.JSON(404, err.Error(), nil)
-		case *errors.PermissionErr:
-			c.JSON(401, err.Error(), nil)
-		default:
-			c.JSON(500, "Internal server error", nil)
-		}
+		fmt.Println("in project delete, delete error: ", err)
+		code, msg := uc.errStatus(err)
+		c.JSON(code, msg, nil)
 		return
 	}
 
 	c.JSON(204, "deleted", nil)
+}
+
+func (uc *ProjectController) errStatus(err error) (int, string) {
+	switch err.(type) {
+	case *errors.PermissionErr:
+		return http.StatusUnauthorized, err.Error()
+	case *errors.NotFoundErr:
+		return http.StatusNotFound, err.Error()
+	case *errors.ModelValidationErr:
+		return http.StatusBadRequest, err.Error()
+	default:
+		return http.StatusInternalServerError, "internal server error"
+	}
 }

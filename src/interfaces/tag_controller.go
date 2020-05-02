@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"task-api/src/usecase"
 	"task-api/src/utils/errors"
@@ -58,7 +59,7 @@ func (con *TagController) Create(c Context) {
 		case *errors.ModelValidationErr:
 			c.JSON(400, err.Error(), nil)
 		default:
-			c.JSON(500, "Internal server error", nil)
+			c.JSON(500, "internal server error", nil)
 		}
 		return
 	}
@@ -79,19 +80,8 @@ func (con *TagController) Update(c Context) {
 	data.UserID = uID
 	tag, err := con.interactor.Update(&data)
 	if err != nil {
-		fmt.Println("update tag error: ", err)
-		var code int
-		switch err.(type) {
-		case *errors.NotFoundErr:
-			code = 404
-		case *errors.ModelValidationErr:
-			code = 400
-		case *errors.PermissionErr:
-			code = 401
-		default:
-			code = 500
-		}
-		c.JSON(code, err.Error(), nil)
+		code, msg := con.errStatus(err)
+		c.JSON(code, msg, nil)
 		return
 	}
 
@@ -108,20 +98,23 @@ func (con *TagController) Delete(c Context) {
 	})
 	if err != nil {
 		fmt.Println("delete tag error: ", err)
-		var code int
-		switch err.(type) {
-		case *errors.NotFoundErr:
-			code = 404
-		case *errors.ModelValidationErr:
-			code = 400
-		case *errors.PermissionErr:
-			code = 401
-		default:
-			code = 500
-		}
-		c.JSON(code, err.Error(), nil)
+		code, msg := con.errStatus(err)
+		c.JSON(code, msg, nil)
 		return
 	}
 
 	c.JSON(204, "deleted", nil)
+}
+
+func (con *TagController) errStatus(err error) (int, string) {
+	switch err.(type) {
+	case *errors.PermissionErr:
+		return http.StatusUnauthorized, err.Error()
+	case *errors.NotFoundErr:
+		return http.StatusNotFound, err.Error()
+	case *errors.ModelValidationErr:
+		return http.StatusBadRequest, err.Error()
+	default:
+		return http.StatusInternalServerError, "internal server error"
+	}
 }
