@@ -1,14 +1,14 @@
 package router
 
 import (
-	"task-api/src/infrastructure/middleware"
 	"task-api/src/interfaces"
+	"task-api/src/interfaces/middleware"
 	"task-api/src/usecase"
 )
 
 func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *Engine {
 
-	middlewares := middleware.New(sqlhandler)
+	middleware := middleware.NewMiddlewre(sqlhandler)
 
 	userController := interfaces.NewUserController(sqlhandler, validator)
 	projectController := interfaces.NewProjectController(sqlhandler, validator)
@@ -24,21 +24,22 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *Eng
 	router.GET("/users/:id", userController.Show)
 
 	// /* projects API */
-	router.GET("/projects", middlewares.Authenticate, projectController.Index)
-	router.POST("/projects", middlewares.Authenticate, projectController.Create)
-	router.DELETE("/projects/:id", middlewares.Authenticate, projectController.Delete)
+	router.GET("/projects", middleware.Auth, projectController.Index)
+	router.POST("/projects", middleware.Auth, projectController.Create)
+	router.DELETE("/projects/:id", middleware.Auth, projectController.Delete)
+	// TODO: show project
 
 	// /* task API */
-	router.GET("/projects/:id/tasks", middlewares.Authenticate, middlewares.RequiredJoinedProject, taskController.Index)
-	router.POST("/projects/:id/tasks", middlewares.Authenticate, middlewares.RequiredWriteRole, taskController.Create)
-	router.DELETE("/projects/:id/tasks/:task_id", middlewares.Authenticate, middlewares.RequiredWriteRole, taskController.Delete)
-	router.PUT("/projects/:id/tasks/:task_id", middlewares.Authenticate, middlewares.RequiredWriteRole, taskController.Update)
+	router.GET("/projects/:id/tasks", middleware.Auth, middleware.RequiredJoinedProject, taskController.Index)
+	router.POST("/projects/:id/tasks", middleware.Auth, middleware.RequiredWriteRole, taskController.Create)
+	router.DELETE("/projects/:id/tasks/:task_id", middleware.Auth, middleware.RequiredWriteRole, taskController.Delete)
+	router.PUT("/projects/:id/tasks/:task_id", middleware.Auth, middleware.RequiredWriteRole, taskController.Update)
 
 	// /* tags API */
-	router.GET("/projects/:id/tags", middlewares.Authenticate, middlewares.RequiredWriteRole, tagController.Index)
-	router.POST("/projects/:id/tags", middlewares.Authenticate, middlewares.RequiredWriteRole, tagController.Create)
-	router.PUT("/tags/:id", middlewares.Authenticate, tagController.Update)
-	router.DELETE("/tags/:id", middlewares.Authenticate, tagController.Delete)
+	router.GET("/projects/:id/tags", middleware.Auth, middleware.RequiredWriteRole, tagController.Index)
+	router.POST("/projects/:id/tags", middleware.Auth, middleware.RequiredWriteRole, tagController.Create)
+	router.PUT("/tags/:id", middleware.Auth, tagController.Update)
+	router.DELETE("/tags/:id", middleware.Auth, tagController.Delete)
 
 	return router
 }

@@ -16,7 +16,7 @@ const (
 	iatKey = "iat"
 	expKey = "exp"
 	// lifetime は jwt の発行から失効までの期間を表す。
-	lifetime = 24 * time.Hour
+	lifetime = 72 * time.Hour
 )
 
 func NewJWT(userID int64) (string, error) {
