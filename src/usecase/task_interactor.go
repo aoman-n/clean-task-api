@@ -9,16 +9,14 @@ import (
 type TaskInteractor interface {
 	Store(*TaskStoreInputDS) (int64, error)
 	Update(*TaskUpdateInputDS) (*model.Task, error)
-	GetList(*TaskGetListInputDS) (*model.Tasks, error)
+	GetList(*TaskGetListInputDS) ([]*model.Task, error)
 	Delete(*TaskDeleteInputDS) error
 }
 
 type taskInteractor struct {
 	transactionHandler TransactionHandler
-	// userRepository    UserRepository
-	// projectRepository ProjectRepository
-	taskRepository TaskRepository
-	validator      Validator
+	taskRepository     TaskRepository
+	validator          Validator
 }
 
 func NewTastInteractor(transactionHandler TransactionHandler, taskRepo TaskRepository, validator Validator) TaskInteractor {
@@ -29,7 +27,7 @@ type TaskGetListInputDS struct {
 	ProjectID int
 }
 
-func (ti *taskInteractor) GetList(in *TaskGetListInputDS) (*model.Tasks, error) {
+func (ti *taskInteractor) GetList(in *TaskGetListInputDS) ([]*model.Task, error) {
 	return ti.taskRepository.FetchByProjectID(nil, in.ProjectID)
 }
 

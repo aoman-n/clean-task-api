@@ -46,7 +46,7 @@ func (repo *projectRepository) AddUser(tx usecase.Transaction, userID int64, pro
 	return projectID, nil
 }
 
-func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64) (model.ProjectResults, error) {
+func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64) ([]*model.ProjectResult, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `
@@ -70,9 +70,9 @@ func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64
 		return nil, err
 	}
 
-	var projects model.ProjectResults
+	projects := make([]*model.ProjectResult, 0)
 	for rows.Next() {
-		var p model.ProjectResult
+		p := new(model.ProjectResult)
 		if err = rows.Scan(&p.ID, &p.Title, &p.Description, &p.Role); err != nil {
 			return nil, err
 		}

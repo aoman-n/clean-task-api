@@ -10,8 +10,6 @@ type Task struct {
 	ProjectID int       `json:"project_id"`
 }
 
-type Tasks []Task
-
 const (
 	Waiting int = iota + 1
 	Doing

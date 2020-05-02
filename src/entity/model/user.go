@@ -12,8 +12,6 @@ type User struct {
 	UpdatedAt      time.Time `json:"-"`
 }
 
-type Users []User
-
 type UserListItem struct {
 	ID          int64  `json:"id"`
 	DisplayName string `json:"displayName"`
@@ -21,5 +19,3 @@ type UserListItem struct {
 	AvatarURL   string `json:"avatarUrl"`
 	Role        string `json:"role"`
 }
-
-type UserList []UserListItem

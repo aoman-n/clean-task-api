@@ -55,7 +55,7 @@ func (repo *userRepository) FindByLoginName(loginName string) (*model.User, erro
 	return &user, nil
 }
 
-func (repo *userRepository) FindByProjectID(projectID int) (*model.UserList, error) {
+func (repo *userRepository) FindByProjectID(id int64) ([]*model.UserListItem, error) {
 	query := `
 	SELECT users.id,users.login_name,users.display_name,users.avatar_url,project_users.role
 	FROM users
@@ -63,16 +63,16 @@ func (repo *userRepository) FindByProjectID(projectID int) (*model.UserList, err
 		ON users.id = project_users.user_id
 	WHERE project_users.project_id = ?
 	`
-	rows, err := repo.sqlhandler.Query(query, projectID)
+	rows, err := repo.sqlhandler.Query(query, id)
 	defer rows.Close()
 
 	if err != nil {
 		return nil, err
 	}
 
-	var users model.UserList
+	users := make([]*model.UserListItem, 0)
 	for rows.Next() {
-		var u model.UserListItem
+		u := new(model.UserListItem)
 		if err := rows.Scan(&u.ID, &u.LoginName, &u.DisplayName, &u.AvatarURL, &u.Role); err != nil {
 			return nil, err
 		}
@@ -84,10 +84,10 @@ func (repo *userRepository) FindByProjectID(projectID int) (*model.UserList, err
 		return nil, err
 	}
 
-	return &users, nil
+	return users, nil
 }
 
-func (repo *userRepository) FindLikeLoginName(loginName string) (model.Users, error) {
+func (repo *userRepository) FindLikeLoginName(loginName string) ([]*model.User, error) {
 	query := "SELECT * FROM users WHERE login_name LIKE '%" + loginName + "%'"
 
 	rows, err := repo.sqlhandler.Query(query)
@@ -96,9 +96,9 @@ func (repo *userRepository) FindLikeLoginName(loginName string) (model.Users, er
 	}
 	defer rows.Close()
 
-	var users model.Users
+	users := make([]*model.User, 0)
 	for rows.Next() {
-		var u model.User
+		u := new(model.User)
 		err := rows.Scan(
 			&u.ID,
 			&u.DisplayName,

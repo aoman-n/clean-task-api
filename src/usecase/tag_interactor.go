@@ -15,7 +15,7 @@ type tagInteractor struct {
 
 type TagInteractor interface {
 	Create(*TagCreateInputDS) (int64, error)
-	GetList(*TagGetListInputDS) (*model.Tags, error)
+	GetList(*TagGetListInputDS) ([]*model.Tag, error)
 	Delete(*TagDeleteInputDS) error
 	Update(*TagUpdateInputDS) (*model.Tag, error)
 }
@@ -64,7 +64,7 @@ type TagGetListInputDS struct {
 	ProjectID int
 }
 
-func (ti *tagInteractor) GetList(in *TagGetListInputDS) (*model.Tags, error) {
+func (ti *tagInteractor) GetList(in *TagGetListInputDS) ([]*model.Tag, error) {
 	tags, err := ti.tagRepository.FetchByProjectID(nil, in.ProjectID)
 	if err != nil {
 		return nil, err

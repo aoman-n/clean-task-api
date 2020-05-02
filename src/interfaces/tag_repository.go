@@ -32,7 +32,7 @@ func (repo *tagRepository) Create(tx usecase.Transaction, t *model.Tag) (int64, 
 	return id, nil
 }
 
-func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID int) (*model.Tags, error) {
+func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID int) ([]*model.Tag, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `SELECT * FROM tags WHERE project_id=?`
@@ -42,9 +42,9 @@ func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID in
 	}
 	defer rows.Close()
 
-	var tags model.Tags
+	tags := make([]*model.Tag, 0)
 	for rows.Next() {
-		var t model.Tag
+		t := new(model.Tag)
 		err := rows.Scan(&t.ID, &t.Name, &t.Color, &t.ProjectID)
 		if err != nil {
 			return nil, err
@@ -57,7 +57,7 @@ func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID in
 		return nil, err
 	}
 
-	return &tags, nil
+	return tags, nil
 }
 
 func (repo *tagRepository) Save(tx usecase.Transaction, t *model.Tag) error {

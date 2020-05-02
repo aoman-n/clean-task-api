@@ -29,7 +29,7 @@ func (mi *middlewareInteractor) CanAccessProject(in *CanAccessProjectInputDS) (b
 	}
 
 	// プロジェクト参加ユーザー一覧にinputのuserIDが存在するか確認
-	for _, u := range *projectUsers {
+	for _, u := range projectUsers {
 		if u.ID == in.UID {
 			return true, nil
 		}
@@ -52,7 +52,7 @@ func (mi *middlewareInteractor) CanWriteProject(in *CanWriteProjectInputDS) (boo
 	}
 
 	// プロジェクトに参加してるかつ、Write以上の権限があるか確認
-	for _, u := range *projectUsers {
+	for _, u := range projectUsers {
 		if u.ID == in.UID && (u.Role == model.Admin || u.Role == model.Write) {
 			return true, nil
 		}

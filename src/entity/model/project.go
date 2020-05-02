@@ -6,13 +6,9 @@ type Project struct {
 	Description string `json:"description" validate:"required,max=300"`
 }
 
-type Projects []Project
-
 type ProjectResult struct {
 	ID          int64  `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Role        string `json:"role"`
 }
-
-type ProjectResults []ProjectResult

@@ -6,5 +6,3 @@ type Tag struct {
 	Color     string `json:"color" validate:"required,min=7,max=7"`
 	ProjectID int    `json:"projectId"`
 }
-
-type Tags []Tag

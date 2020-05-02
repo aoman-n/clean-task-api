@@ -68,7 +68,7 @@ func (repo *taskRepository) Save(tx usecase.Transaction, t *model.Task) (int64, 
 	return t.ID, nil
 }
 
-func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) (*model.Tasks, error) {
+func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) ([]*model.Task, error) {
 	sqlhandler := repo.FromTransaction(tx)
 
 	rows, err := sqlhandler.Query(`SELECT * FROM tasks WHERE project_id=?`, pID)
@@ -77,9 +77,9 @@ func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) (*
 	}
 	defer rows.Close()
 
-	var tasks model.Tasks
+	tasks := make([]*model.Task, 0)
 	for rows.Next() {
-		var t model.Task
+		t := new(model.Task)
 		err := rows.Scan(&t.ID, &t.Name, &t.DueOn, &t.Status, &t.ProjectID)
 		if err != nil {
 			return nil, err
@@ -92,7 +92,7 @@ func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) (*
 		return nil, err
 	}
 
-	return &tasks, nil
+	return tasks, nil
 }
 
 func (repo *taskRepository) Delete(tx usecase.Transaction, tID int) error {
