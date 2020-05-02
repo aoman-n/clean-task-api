@@ -1,56 +1,13 @@
 ## task-app
 
-## schema
+:dolphin: :dolphin:
 
-### Users
+:dolphin: :dolphin:
 
-- display_name
-- login_name
-- password_digest
-- avatar_url
+:dolphin: :dolphin:
 
-### Project_users
+:dolphin: :dolphin:
 
-- user_id(FK)
-- project_id(FK)
-- role
+:dolphin: :dolphin:
 
-### Projects
-
-- title
-- description
-
-### Tasks
-
-- project_id(FK)
-- name
-- body(追加する)
-- due_on
-- status
-  - wating
-  - doing
-  - done
-  - canceled
-
-### Notes
-
-- message
-- image_url
-- project_id(FK)
-- user_id(FK)
-
-### Momes
-
-- task_id(FK)
-- body
-
-### task_tags
-
-- task_id(FK)
-- tag_id
-
-### Tags
-
-- project_id(FK)
-- name
-- color
+:dolphin: :dolphin:
