@@ -1,12 +1,15 @@
 package router
 
 import (
+	"net/http"
 	"task-api/src/interfaces"
 	"task-api/src/interfaces/middleware"
 	"task-api/src/usecase"
+
+	"github.com/rs/cors"
 )
 
-func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *Engine {
+func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http.Handler {
 
 	middleware := middleware.NewMiddlewre(sqlhandler)
 
@@ -41,5 +44,16 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *Eng
 	router.PUT("/tags/:id", middleware.Auth, tagController.Update)
 	router.DELETE("/tags/:id", middleware.Auth, tagController.Delete)
 
-	return router
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+
+	handler := c.Handler(router)
+
+	return handler
 }

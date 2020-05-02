@@ -15,6 +15,7 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/oxequa/interact v0.0.0-20171114182912-f8fb5795b5d7 // indirect
 	github.com/oxequa/realize v2.0.2+incompatible // indirect
+	github.com/rs/cors v1.7.0
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/valyala/fasttemplate v1.1.0 // indirect
