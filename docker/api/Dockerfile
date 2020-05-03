@@ -1,6 +1,6 @@
 # common build
 FROM golang:1.13 as base
-COPY . /api
+COPY ./api /api
 WORKDIR /api
 RUN apt-get update && apt-get -y install default-mysql-client
 

@@ -3,18 +3,11 @@ package router
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
-
-// type Context interface {
-// 	JSON(code int, msg string, data interface{})
-// 	Param(key string) string
-// 	Set(key string, value interface{})
-// 	Get(key string) (value interface{}, exists bool)
-// 	MustGet(key string) (value interface{})
-// }
 
 type Context struct {
 	w      http.ResponseWriter
@@ -29,6 +22,7 @@ type Response struct {
 }
 
 func (c *Context) JSON(code int, msg string, data interface{}) {
+	fmt.Println("response data: ", data)
 	res := &Response{
 		Msg:  msg,
 		Data: data,
