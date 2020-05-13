@@ -8,6 +8,7 @@ type Task struct {
 	DueOn     time.Time `json:"-"`
 	Status    int       `json:"status"`
 	ProjectID int       `json:"-"`
+	Tags      []*Tag    `json:"tags"`
 }
 
 const (

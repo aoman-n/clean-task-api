@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"strings"
 	"task-api/src/entity/model"
 	"task-api/src/entity/repository"
 	"task-api/src/interfaces"
@@ -86,6 +87,7 @@ func (repo *taskRepository) FetchByProjectID(tx repository.Transaction, pID int)
 		if err != nil {
 			return nil, err
 		}
+		t.Tags = []*model.Tag{}
 
 		tasks = append(tasks, t)
 	}
@@ -94,7 +96,65 @@ func (repo *taskRepository) FetchByProjectID(tx repository.Transaction, pID int)
 		return nil, err
 	}
 
+	taskIDs := make([]int64, 0)
+	for _, t := range tasks {
+		taskIDs = append(taskIDs, t.ID)
+	}
+
+	tags, err := repo.fetchTags(nil, taskIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: もっと効率よく
+	for _, tag := range tags {
+		for _, task := range tasks {
+			if tag.TaskID == task.ID {
+				task.Tags = append(task.Tags, tag)
+			}
+		}
+	}
+
 	return tasks, nil
+}
+
+func (repo *taskRepository) fetchTags(tx repository.Transaction, taskIDs []int64) ([]*model.Tag, error) {
+	sqlhandler := repo.FromTransaction(tx)
+
+	query := `
+	SELECT t.id,t.name,t.color,tt.task_id FROM task_tags as tt
+		INNER JOIN tags as t ON tt.tag_id = t.id
+		WHERE tt.task_id IN (?` + strings.Repeat(",?", len(taskIDs)-1) + `)`
+
+	// interface{}型にしないと展開して引数に渡せないので変換
+	ids := make([]interface{}, len(taskIDs))
+	for i, v := range taskIDs {
+		ids[i] = v
+	}
+
+	rows, err := sqlhandler.Query(query, ids...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []*model.Tag
+	for rows.Next() {
+		var t model.Tag
+		rows.Scan(&t.ID, &t.Name, &t.Color, &t.TaskID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		tags = append(tags, &t)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tags, nil
 }
 
 func (repo *taskRepository) Delete(tx repository.Transaction, tID int) error {
