@@ -2,7 +2,10 @@ package router
 
 import (
 	"net/http"
+	"os"
+	"task-api/src/infrastructure/engine"
 	"task-api/src/interfaces"
+	"task-api/src/interfaces/controller"
 	"task-api/src/interfaces/middleware"
 	"task-api/src/usecase"
 
@@ -13,12 +16,12 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http
 
 	middleware := middleware.NewMiddlewre(sqlhandler)
 
-	userController := interfaces.NewUserController(sqlhandler, validator)
-	projectController := interfaces.NewProjectController(sqlhandler, validator)
-	taskController := interfaces.NewTaskController(sqlhandler, validator)
-	tagController := interfaces.NewTagController(sqlhandler, validator)
+	userController := controller.NewUserController(sqlhandler, validator)
+	projectController := controller.NewProjectController(sqlhandler, validator)
+	taskController := controller.NewTaskController(sqlhandler, validator)
+	tagController := controller.NewTagController(sqlhandler, validator)
 
-	router := NewH()
+	router := engine.New()
 
 	/* users API */
 	router.POST("/signup", userController.Singup)
@@ -45,7 +48,7 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http
 	router.DELETE("/tags/:id", middleware.Auth, tagController.Delete)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{os.Getenv("FRONT_ORIGIN"), os.Getenv("BFF_ORIGIN")},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},

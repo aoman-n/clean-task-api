@@ -1,21 +1,22 @@
-package interfaces
+package gateway
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
-	"task-api/src/usecase"
+	"task-api/src/entity/repository"
+	"task-api/src/interfaces"
 	"task-api/src/utils/errors"
 )
 
 type taskRepository struct {
-	SQLHandler
+	interfaces.SQLHandler
 }
 
-func NewTaskRepository(sqlhandler SQLHandler) usecase.TaskRepository {
+func NewTaskRepository(sqlhandler interfaces.SQLHandler) repository.TaskRepository {
 	return &taskRepository{sqlhandler}
 }
 
-func (repo *taskRepository) Create(tx usecase.Transaction, t *model.Task) (int64, error) {
+func (repo *taskRepository) Create(tx repository.Transaction, t *model.Task) (int64, error) {
 	sqlhandler := repo.FromTransaction(tx)
 
 	query := `INSERT INTO tasks (name, due_on, status, project_id) VALUES (?, ?, ?, ?)`
@@ -32,7 +33,7 @@ func (repo *taskRepository) Create(tx usecase.Transaction, t *model.Task) (int64
 	return id, nil
 }
 
-func (repo *taskRepository) FindByID(tx usecase.Transaction, id int) (*model.Task, error) {
+func (repo *taskRepository) FindByID(tx repository.Transaction, id int) (*model.Task, error) {
 	sqlhandler := repo.FromTransaction(tx)
 
 	var task model.Task
@@ -48,7 +49,7 @@ func (repo *taskRepository) FindByID(tx usecase.Transaction, id int) (*model.Tas
 	return &task, nil
 }
 
-func (repo *taskRepository) Save(tx usecase.Transaction, t *model.Task) (int64, error) {
+func (repo *taskRepository) Save(tx repository.Transaction, t *model.Task) (int64, error) {
 	sqlhandler := repo.FromTransaction(tx)
 
 	query := `UPDATE tasks SET name=?, due_on=?, status=? WHERE id=?`
@@ -68,7 +69,7 @@ func (repo *taskRepository) Save(tx usecase.Transaction, t *model.Task) (int64, 
 	return t.ID, nil
 }
 
-func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) ([]*model.Task, error) {
+func (repo *taskRepository) FetchByProjectID(tx repository.Transaction, pID int) ([]*model.Task, error) {
 	sqlhandler := repo.FromTransaction(tx)
 
 	rows, err := sqlhandler.Query(`SELECT * FROM tasks WHERE project_id=?`, pID)
@@ -95,7 +96,7 @@ func (repo *taskRepository) FetchByProjectID(tx usecase.Transaction, pID int) ([
 	return tasks, nil
 }
 
-func (repo *taskRepository) Delete(tx usecase.Transaction, tID int) error {
+func (repo *taskRepository) Delete(tx repository.Transaction, tID int) error {
 	sqlhandler := repo.FromTransaction(tx)
 
 	result, err := sqlhandler.Exec(`DELETE FROM tasks WHERE id=?`, tID)

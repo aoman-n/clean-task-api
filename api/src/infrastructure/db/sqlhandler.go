@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"task-api/src/entity/repository"
 	"task-api/src/interfaces"
-	"task-api/src/usecase"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -101,7 +101,7 @@ func (s *SQLHandler) Exec(query string, args ...interface{}) (interfaces.Result,
 	return result, nil
 }
 
-func (s *SQLHandler) TransactAndReturnData(txFunc func(usecase.Transaction) (interface{}, error)) (data interface{}, err error) {
+func (s *SQLHandler) TransactAndReturnData(txFunc func(repository.Transaction) (interface{}, error)) (data interface{}, err error) {
 	tx, err := s.Conn.Begin()
 
 	if err != nil {
@@ -126,7 +126,7 @@ func (s *SQLHandler) Transactionable() {
 	return
 }
 
-func (s *SQLHandler) FromTransaction(tx usecase.Transaction) interfaces.SQLHandler {
+func (s *SQLHandler) FromTransaction(tx repository.Transaction) interfaces.SQLHandler {
 	sqlhandler, ok := tx.(*SQLHandler)
 
 	if !ok {

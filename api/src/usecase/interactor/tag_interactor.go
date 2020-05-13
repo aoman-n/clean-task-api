@@ -1,16 +1,18 @@
-package usecase
+package interactor
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
+	"task-api/src/entity/repository"
+	"task-api/src/usecase"
 	"task-api/src/utils/errors"
 )
 
 type tagInteractor struct {
-	transactionHandler TransactionHandler
-	tagRepository      TagRepository
-	projectRepository  ProjectRepository
-	validator          Validator
+	transactionHandler repository.TransactionHandler
+	tagRepository      repository.TagRepository
+	projectRepository  repository.ProjectRepository
+	validator          usecase.Validator
 }
 
 type TagInteractor interface {
@@ -21,10 +23,10 @@ type TagInteractor interface {
 }
 
 func NewTagInteractor(
-	txHandler TransactionHandler,
-	tagRepo TagRepository,
-	pRepo ProjectRepository,
-	validator Validator,
+	txHandler repository.TransactionHandler,
+	tagRepo repository.TagRepository,
+	pRepo repository.ProjectRepository,
+	validator usecase.Validator,
 ) TagInteractor {
 	return &tagInteractor{
 		transactionHandler: txHandler,

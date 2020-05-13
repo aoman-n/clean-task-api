@@ -1,7 +1,9 @@
-package usecase
+package interactor
 
 import (
 	"task-api/src/entity/model"
+	"task-api/src/entity/repository"
+	"task-api/src/usecase"
 	"task-api/src/utils/errors"
 	"time"
 )
@@ -14,12 +16,12 @@ type TaskInteractor interface {
 }
 
 type taskInteractor struct {
-	transactionHandler TransactionHandler
-	taskRepository     TaskRepository
-	validator          Validator
+	transactionHandler repository.TransactionHandler
+	taskRepository     repository.TaskRepository
+	validator          usecase.Validator
 }
 
-func NewTastInteractor(transactionHandler TransactionHandler, taskRepo TaskRepository, validator Validator) TaskInteractor {
+func NewTastInteractor(transactionHandler repository.TransactionHandler, taskRepo repository.TaskRepository, validator usecase.Validator) TaskInteractor {
 	return &taskInteractor{transactionHandler, taskRepo, validator}
 }
 

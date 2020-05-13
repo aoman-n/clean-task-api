@@ -1,15 +1,17 @@
 package interfaces
 
-import "task-api/src/usecase"
+import (
+	"task-api/src/entity/repository"
+)
 
 type SQLHandler interface {
 	Query(string, ...interface{}) (Rows, error)
 	QueryRow(query string, args ...interface{}) Row
 	Exec(string, ...interface{}) (Result, error)
 	Close()
-	TransactAndReturnData(txFunc func(usecase.Transaction) (interface{}, error)) (data interface{}, err error)
+	TransactAndReturnData(txFunc func(repository.Transaction) (interface{}, error)) (data interface{}, err error)
 	Transactionable()
-	FromTransaction(tx usecase.Transaction) SQLHandler
+	FromTransaction(tx repository.Transaction) SQLHandler
 }
 
 type Result interface {

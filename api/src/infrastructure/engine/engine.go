@@ -1,4 +1,4 @@
-package router
+package engine
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ type Engine struct {
 	handle Handle
 }
 
-func NewH() *Engine {
+func New() *Engine {
 	router := httprouter.New()
 	handle := &handle{}
 

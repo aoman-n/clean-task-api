@@ -1,21 +1,22 @@
-package interfaces
+package gateway
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
-	"task-api/src/usecase"
+	"task-api/src/entity/repository"
+	"task-api/src/interfaces"
 	"task-api/src/utils/errors"
 )
 
 type projectRepository struct {
-	sqlhandler SQLHandler
+	sqlhandler interfaces.SQLHandler
 }
 
-func NewProjectRepository(sqlhandler SQLHandler) usecase.ProjectRepository {
+func NewProjectRepository(sqlhandler interfaces.SQLHandler) repository.ProjectRepository {
 	return &projectRepository{sqlhandler}
 }
 
-func (repo *projectRepository) Create(tx usecase.Transaction, p *model.Project) (int64, error) {
+func (repo *projectRepository) Create(tx repository.Transaction, p *model.Project) (int64, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	qeury := `insert into projects (title, description) values (?, ?)`
@@ -33,7 +34,7 @@ func (repo *projectRepository) Create(tx usecase.Transaction, p *model.Project) 
 	return projectID, nil
 }
 
-func (repo *projectRepository) AddUser(tx usecase.Transaction, userID int64, projectID int64, role string) (int64, error) {
+func (repo *projectRepository) AddUser(tx repository.Transaction, userID int64, projectID int64, role string) (int64, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	qeury := `insert into project_users (user_id, project_id, role) values (?, ?, ?)`
@@ -46,7 +47,7 @@ func (repo *projectRepository) AddUser(tx usecase.Transaction, userID int64, pro
 	return projectID, nil
 }
 
-func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64) ([]*model.ProjectResult, error) {
+func (repo *projectRepository) FindByUserID(tx repository.Transaction, userID int64) ([]*model.ProjectResult, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `
@@ -86,7 +87,7 @@ func (repo *projectRepository) FindByUserID(tx usecase.Transaction, userID int64
 	return projects, nil
 }
 
-func (repo *projectRepository) RoleByProjectID(tx usecase.Transaction, userID int64, projectID int) (string, error) {
+func (repo *projectRepository) RoleByProjectID(tx repository.Transaction, userID int64, projectID int) (string, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	var role string
@@ -100,7 +101,7 @@ func (repo *projectRepository) RoleByProjectID(tx usecase.Transaction, userID in
 	return role, nil
 }
 
-func (repo *projectRepository) Delete(tx usecase.Transaction, projectID int) error {
+func (repo *projectRepository) Delete(tx repository.Transaction, projectID int) error {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	_, err := sqlhandler.Exec("DELETE FROM projects WHERE id = ?", projectID)

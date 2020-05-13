@@ -1,25 +1,28 @@
-package interfaces
+package controller
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"task-api/src/interfaces"
+	"task-api/src/interfaces/gateway"
 	"task-api/src/usecase"
+	"task-api/src/usecase/interactor"
 	"task-api/src/utils/errors"
 )
 
 type taskController struct {
-	taskInteractor usecase.TaskInteractor
+	taskInteractor interactor.TaskInteractor
 }
 
-func NewTaskController(sqlhandler SQLHandler, validator usecase.Validator) *taskController {
-	taskRepository := NewTaskRepository(sqlhandler)
-	taskInteractor := usecase.NewTastInteractor(sqlhandler, taskRepository, validator)
+func NewTaskController(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *taskController {
+	taskRepository := gateway.NewTaskRepository(sqlhandler)
+	taskInteractor := interactor.NewTastInteractor(sqlhandler, taskRepository, validator)
 
 	return &taskController{taskInteractor}
 }
 
-func (con *taskController) Index(c Context) {
+func (con *taskController) Index(c interfaces.Context) {
 	projectID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		fmt.Println("id must be integer err: ", err)
@@ -27,7 +30,7 @@ func (con *taskController) Index(c Context) {
 		return
 	}
 
-	tasks, err := con.taskInteractor.GetList(&usecase.TaskGetListInputDS{ProjectID: projectID})
+	tasks, err := con.taskInteractor.GetList(&interactor.TaskGetListInputDS{ProjectID: projectID})
 	if err != nil {
 		fmt.Println("usecase GetList error: ", err)
 		c.JSON(500, "Internal server error", nil)
@@ -37,10 +40,10 @@ func (con *taskController) Index(c Context) {
 	c.JSON(http.StatusOK, "ok", tasks)
 }
 
-func (con *taskController) Create(c Context) {
+func (con *taskController) Create(c interfaces.Context) {
 	projectID, _ := strconv.Atoi(c.Param("id"))
 
-	var data usecase.TaskStoreInputDS
+	var data interactor.TaskStoreInputDS
 	if err := c.Bind(&data); err != nil {
 		c.JSON(400, "bad request", nil)
 		return
@@ -62,10 +65,10 @@ func (con *taskController) Create(c Context) {
 	c.JSON(200, "ok", map[string]interface{}{"id": id})
 }
 
-func (con *taskController) Update(c Context) {
+func (con *taskController) Update(c interfaces.Context) {
 	taskID, _ := strconv.Atoi(c.Param("task_id"))
 
-	var data usecase.TaskUpdateInputDS
+	var data interactor.TaskUpdateInputDS
 	if err := c.Bind(&data); err != nil {
 		fmt.Println("data decode error: ", err)
 		c.JSON(400, err.Error(), nil)
@@ -88,7 +91,7 @@ func (con *taskController) Update(c Context) {
 	c.JSON(200, "ok", map[string]interface{}{"task": updatedTask})
 }
 
-func (con *taskController) Delete(c Context) {
+func (con *taskController) Delete(c interfaces.Context) {
 	taskID, err := strconv.Atoi(c.Param("task_id"))
 	if err != nil {
 		fmt.Println("id must be integer err: ", err)
@@ -96,7 +99,7 @@ func (con *taskController) Delete(c Context) {
 		return
 	}
 
-	err = con.taskInteractor.Delete(&usecase.TaskDeleteInputDS{TaskID: taskID})
+	err = con.taskInteractor.Delete(&interactor.TaskDeleteInputDS{TaskID: taskID})
 	if err != nil {
 		fmt.Println("usecase Delete error: ", err)
 		switch err.(type) {

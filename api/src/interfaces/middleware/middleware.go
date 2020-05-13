@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strconv"
 	"task-api/src/interfaces"
-	"task-api/src/usecase"
+	"task-api/src/interfaces/gateway"
+	"task-api/src/usecase/interactor"
 	"task-api/src/utils/auth"
 )
 
@@ -15,12 +16,12 @@ type Middleware interface {
 }
 
 type middleware struct {
-	midInteractor usecase.MiddlewareInteractor
+	midInteractor interactor.MiddlewareInteractor
 }
 
 func NewMiddlewre(sqlhandler interfaces.SQLHandler) Middleware {
-	userRepo := interfaces.NewUserRepository(sqlhandler)
-	midInteractor := usecase.NewMiddlewareInteractor(userRepo)
+	userRepo := gateway.NewUserRepository(sqlhandler)
+	midInteractor := interactor.NewMiddlewareInteractor(userRepo)
 
 	return &middleware{midInteractor}
 }
@@ -44,7 +45,7 @@ func (m *middleware) RequiredJoinedProject(c interfaces.Context) {
 		// TODO: error handling
 	}
 
-	canAccess, err := m.midInteractor.CanAccessProject(&usecase.CanAccessProjectInputDS{
+	canAccess, err := m.midInteractor.CanAccessProject(&interactor.CanAccessProjectInputDS{
 		UID: uID,
 		PID: pID,
 	})
@@ -69,7 +70,7 @@ func (m *middleware) RequiredWriteRole(c interfaces.Context) {
 		// TODO: error handling
 	}
 
-	canWrite, err := m.midInteractor.CanWriteProject(&usecase.CanWriteProjectInputDS{
+	canWrite, err := m.midInteractor.CanWriteProject(&interactor.CanWriteProjectInputDS{
 		UID: uID,
 		PID: pID,
 	})

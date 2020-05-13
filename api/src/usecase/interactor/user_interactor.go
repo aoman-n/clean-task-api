@@ -1,15 +1,17 @@
-package usecase
+package interactor
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
+	"task-api/src/entity/repository"
+	"task-api/src/usecase"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userInteractor struct {
-	userRepository UserRepository
-	validator      Validator
+	userRepository repository.UserRepository
+	validator      usecase.Validator
 }
 
 type UserInteractor interface {
@@ -18,7 +20,7 @@ type UserInteractor interface {
 	Search(*UserSearchInputDS) ([]*model.User, error)
 }
 
-func NewUserInteractor(repo UserRepository, validator Validator) UserInteractor {
+func NewUserInteractor(repo repository.UserRepository, validator usecase.Validator) UserInteractor {
 	return &userInteractor{repo, validator}
 }
 

@@ -1,21 +1,22 @@
-package interfaces
+package gateway
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
-	"task-api/src/usecase"
+	"task-api/src/entity/repository"
+	"task-api/src/interfaces"
 	"task-api/src/utils/errors"
 )
 
 type tagRepository struct {
-	sqlhandler SQLHandler
+	sqlhandler interfaces.SQLHandler
 }
 
-func NewTagRepository(sqlhandler SQLHandler) usecase.TagRepository {
+func NewTagRepository(sqlhandler interfaces.SQLHandler) repository.TagRepository {
 	return &tagRepository{sqlhandler}
 }
 
-func (repo *tagRepository) Create(tx usecase.Transaction, t *model.Tag) (int64, error) {
+func (repo *tagRepository) Create(tx repository.Transaction, t *model.Tag) (int64, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `INSERT INTO tags (name,color,project_id) VALUES (?,?,?)`
@@ -32,7 +33,7 @@ func (repo *tagRepository) Create(tx usecase.Transaction, t *model.Tag) (int64, 
 	return id, nil
 }
 
-func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID int) ([]*model.Tag, error) {
+func (repo *tagRepository) FetchByProjectID(tx repository.Transaction, projectID int) ([]*model.Tag, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `SELECT * FROM tags WHERE project_id=?`
@@ -60,7 +61,7 @@ func (repo *tagRepository) FetchByProjectID(tx usecase.Transaction, projectID in
 	return tags, nil
 }
 
-func (repo *tagRepository) Save(tx usecase.Transaction, t *model.Tag) error {
+func (repo *tagRepository) Save(tx repository.Transaction, t *model.Tag) error {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	query := `UPDATE tags SET name=?,color=? WHERE id=?`
@@ -79,7 +80,7 @@ func (repo *tagRepository) Save(tx usecase.Transaction, t *model.Tag) error {
 	return nil
 }
 
-func (repo *tagRepository) FindByID(tx usecase.Transaction, id int) (*model.Tag, error) {
+func (repo *tagRepository) FindByID(tx repository.Transaction, id int) (*model.Tag, error) {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	var tag model.Tag
@@ -94,7 +95,7 @@ func (repo *tagRepository) FindByID(tx usecase.Transaction, id int) (*model.Tag,
 	return &tag, nil
 }
 
-func (repo *tagRepository) Delete(tx usecase.Transaction, id int) error {
+func (repo *tagRepository) Delete(tx repository.Transaction, id int) error {
 	sqlhandler := repo.sqlhandler.FromTransaction(tx)
 
 	_, err := sqlhandler.Exec(`DELETE FROM tags WHERE id=?`, id)

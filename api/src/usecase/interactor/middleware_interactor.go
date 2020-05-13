@@ -1,6 +1,9 @@
-package usecase
+package interactor
 
-import "task-api/src/entity/model"
+import (
+	"task-api/src/entity/model"
+	"task-api/src/entity/repository"
+)
 
 type MiddlewareInteractor interface {
 	CanAccessProject(*CanAccessProjectInputDS) (bool, error)
@@ -8,10 +11,10 @@ type MiddlewareInteractor interface {
 }
 
 type middlewareInteractor struct {
-	userRepository UserRepository
+	userRepository repository.UserRepository
 }
 
-func NewMiddlewareInteractor(uRepo UserRepository) MiddlewareInteractor {
+func NewMiddlewareInteractor(uRepo repository.UserRepository) MiddlewareInteractor {
 	return &middlewareInteractor{uRepo}
 }
 

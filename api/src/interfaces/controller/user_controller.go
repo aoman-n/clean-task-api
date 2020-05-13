@@ -1,30 +1,33 @@
-package interfaces
+package controller
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"task-api/src/interfaces"
+	"task-api/src/interfaces/gateway"
 	"task-api/src/usecase"
+	"task-api/src/usecase/interactor"
 	"task-api/src/utils/auth"
 )
 
 type UserController struct {
-	UserInteractor usecase.UserInteractor
+	UserInteractor interactor.UserInteractor
 }
 
-func NewUserController(sqlhandler SQLHandler, validator usecase.Validator) *UserController {
-	userRepository := NewUserRepository(sqlhandler)
-	userInteractor := usecase.NewUserInteractor(userRepository, validator)
+func NewUserController(sqlhandler interfaces.SQLHandler, validator usecase.Validator) *UserController {
+	userRepository := gateway.NewUserRepository(sqlhandler)
+	userInteractor := interactor.NewUserInteractor(userRepository, validator)
 
 	return &UserController{
 		UserInteractor: userInteractor,
 	}
 }
 
-func (uc *UserController) Index(c Context) {
+func (uc *UserController) Index(c interfaces.Context) {
 	q := c.Query("q")
 
-	users, err := uc.UserInteractor.Search(&usecase.UserSearchInputDS{Q: q})
+	users, err := uc.UserInteractor.Search(&interactor.UserSearchInputDS{Q: q})
 	if err != nil {
 		fmt.Println("user search error: ", err)
 		c.JSON(500, "Internal Server Error", nil)
@@ -34,7 +37,7 @@ func (uc *UserController) Index(c Context) {
 	c.JSON(200, "ok", users)
 }
 
-func (uc *UserController) Show(c Context) {
+func (uc *UserController) Show(c interfaces.Context) {
 	jwtToken := auth.GetTokenFromHeader(c.Header("Authorization"))
 	userID, err := auth.DecodeJWT(jwtToken)
 	if err != nil {
@@ -55,8 +58,8 @@ type OkRes struct {
 	Token string `json:"token"`
 }
 
-func (uc *UserController) Singup(c Context) {
-	var data usecase.UserStoreInputDS
+func (uc *UserController) Singup(c interfaces.Context) {
+	var data interactor.UserStoreInputDS
 	if err := c.Bind(&data); err != nil {
 		fmt.Println("failed to decode. err: ", err)
 		c.JSON(400, err.Error(), nil)
@@ -76,8 +79,8 @@ func (uc *UserController) Singup(c Context) {
 
 // Params: loginName, password
 // Return: id, jwtToken
-func (uc *UserController) Login(c Context) {
-	var input usecase.UserLoginInputDS
+func (uc *UserController) Login(c interfaces.Context) {
+	var input interactor.UserLoginInputDS
 	if err := c.Bind(&input); err != nil {
 		fmt.Println("failed to decode. err: ", err)
 		c.JSON(400, "bad request", nil)

@@ -1,4 +1,4 @@
-package usecase
+package repository
 
 import "task-api/src/entity/model"
 

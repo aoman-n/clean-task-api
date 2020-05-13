@@ -1,16 +1,17 @@
-package interfaces
+package gateway
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
-	"task-api/src/usecase"
+	"task-api/src/entity/repository"
+	"task-api/src/interfaces"
 )
 
 type userRepository struct {
-	sqlhandler SQLHandler
+	sqlhandler interfaces.SQLHandler
 }
 
-func NewUserRepository(sqlhandler SQLHandler) usecase.UserRepository {
+func NewUserRepository(sqlhandler interfaces.SQLHandler) repository.UserRepository {
 	return &userRepository{sqlhandler}
 }
 

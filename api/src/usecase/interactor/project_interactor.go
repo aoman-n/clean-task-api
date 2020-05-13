@@ -1,8 +1,10 @@
-package usecase
+package interactor
 
 import (
 	"fmt"
 	"task-api/src/entity/model"
+	"task-api/src/entity/repository"
+	"task-api/src/usecase"
 	"task-api/src/utils/errors"
 )
 
@@ -13,13 +15,18 @@ type ProjectInteractor interface {
 }
 
 type projectInteractor struct {
-	UserRepository     UserRepository
-	ProjectRepository  ProjectRepository
-	TransactionHandler TransactionHandler
-	Validator          Validator
+	UserRepository     repository.UserRepository
+	ProjectRepository  repository.ProjectRepository
+	TransactionHandler repository.TransactionHandler
+	Validator          usecase.Validator
 }
 
-func NewProjectInteractor(userRepo UserRepository, projectRepo ProjectRepository, transactionHandler TransactionHandler, validator Validator) ProjectInteractor {
+func NewProjectInteractor(
+	userRepo repository.UserRepository,
+	projectRepo repository.ProjectRepository,
+	transactionHandler repository.TransactionHandler,
+	validator usecase.Validator,
+) ProjectInteractor {
 	return &projectInteractor{userRepo, projectRepo, transactionHandler, validator}
 }
 
@@ -37,7 +44,7 @@ func (pi *projectInteractor) Store(in *ProjectStoreInputDS) (int64, error) {
 	}
 
 	// トランザクション内で、project作成とアドミンUserとして参加させる処理
-	projectID, err := pi.TransactionHandler.TransactAndReturnData(func(tx Transaction) (interface{}, error) {
+	projectID, err := pi.TransactionHandler.TransactAndReturnData(func(tx repository.Transaction) (interface{}, error) {
 		projectID, err := pi.ProjectRepository.Create(tx, project)
 		if err != nil {
 			return nil, err
