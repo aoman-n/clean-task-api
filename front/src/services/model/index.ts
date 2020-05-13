@@ -4,3 +4,9 @@ export interface Project {
   description: string
   role: string
 }
+
+export interface Task {
+  id: number
+  name: string
+  status: number
+}

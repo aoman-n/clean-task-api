@@ -50,7 +50,7 @@ func (con *taskController) Create(c interfaces.Context) {
 	}
 
 	req.ProjectID = projectID
-	id, err := con.taskInteractor.Store(&req)
+	task, err := con.taskInteractor.Store(&req)
 	if err != nil {
 		fmt.Println("task usecase store error: ", err)
 		switch err.(type) {
@@ -62,7 +62,7 @@ func (con *taskController) Create(c interfaces.Context) {
 		return
 	}
 
-	c.JSON(200, "ok", map[string]interface{}{"id": id})
+	c.JSON(200, "ok", task)
 }
 
 func (con *taskController) Update(c interfaces.Context) {

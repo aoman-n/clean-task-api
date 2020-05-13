@@ -9,7 +9,7 @@ import (
 )
 
 type TaskInteractor interface {
-	Store(*TaskStoreInputDS) (int64, error)
+	Store(*TaskStoreInputDS) (*model.Task, error)
 	Update(*TaskUpdateInputDS) (*model.Task, error)
 	GetList(*TaskGetListInputDS) ([]*model.Task, error)
 	Delete(*TaskDeleteInputDS) error
@@ -38,7 +38,7 @@ type TaskStoreInputDS struct {
 	Name      string `json:"name"`
 }
 
-func (ti *taskInteractor) Store(in *TaskStoreInputDS) (int64, error) {
+func (ti *taskInteractor) Store(in *TaskStoreInputDS) (*model.Task, error) {
 	task := model.Task{
 		Name:      in.Name,
 		DueOn:     time.Now(),
@@ -47,15 +47,15 @@ func (ti *taskInteractor) Store(in *TaskStoreInputDS) (int64, error) {
 	}
 	err := ti.validator.Struct(task)
 	if err != nil {
-		return 0, errors.NewModelValidationErr(err.Error())
+		return nil, errors.NewModelValidationErr(err.Error())
 	}
 
-	id, err := ti.taskRepository.Create(nil, &task)
+	_, err = ti.taskRepository.Create(nil, &task)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return &task, nil
 }
 
 type TaskUpdateInputDS struct {

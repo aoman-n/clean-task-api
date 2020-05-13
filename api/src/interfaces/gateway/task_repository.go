@@ -29,6 +29,7 @@ func (repo *taskRepository) Create(tx repository.Transaction, t *model.Task) (in
 	if err != nil {
 		return 0, errors.NewRecordSaveErr("failed to create task")
 	}
+	t.ID = id
 
 	return id, nil
 }

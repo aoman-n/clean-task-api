@@ -12,6 +12,7 @@ import { makeStore } from '~/store'
 import withRedux from 'next-redux-wrapper'
 import { Store } from 'redux'
 import { RootState } from '~/modules/rootState'
+import { setToken } from '~/modules/auth'
 import 'antd/dist/antd.css'
 
 Router.events.on('routeChangeStart', (url) => {
@@ -52,6 +53,7 @@ class MyApp extends App<Props> {
     let pageProps = {}
 
     const auth = loadAuthFromCookie(ctx)
+    ctx.store.dispatch(setToken(String(auth.token)))
 
     if (Component.getInitialProps) {
       pageProps = await (Component as any).getInitialProps({ ...ctx, auth })

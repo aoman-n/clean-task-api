@@ -43,7 +43,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         dataSource={projects}
         renderItem={(item) => (
           <List.Item style={{ paddingLeft: '24px', paddingRight: '24px' }}>
-            <Link href={`/dashboard/${item.id}/tasks`}>
+            {/* <Link href={`/dashboard/${item.id}/tasks`}> */}
+            <Link href={`/dashboard/${item.id}/${item.title}`}>
               <a>
                 <List.Item.Meta
                   title={item.title}

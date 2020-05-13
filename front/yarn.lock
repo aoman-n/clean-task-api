@@ -6846,6 +6846,11 @@ react-dom@^16.13.1:
     prop-types "^15.6.2"
     scheduler "^0.19.1"
 
+react-hook-form-input@^1.1.10:
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/react-hook-form-input/-/react-hook-form-input-1.1.10.tgz#71a87d9c814176e7f127382e257bcb8de4498e22"
+  integrity sha512-RkkJeQmfUDT+Wq6iVGdvNY3rLTAD7KW1utgbCIyKRpDh41lf2Z8dC57GSapAh8TMLL1s6F57CUqXBZuGHZQgxA==
+
 react-hook-form@^5.6.1:
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-5.6.1.tgz#8b6017ec01731bde4f6a6bcd94955ff5e69e28cc"

@@ -7,7 +7,7 @@ type Task struct {
 	Name      string    `json:"name" validate:"required,max=255"`
 	DueOn     time.Time `json:"-"`
 	Status    int       `json:"status"`
-	ProjectID int       `json:"project_id"`
+	ProjectID int       `json:"-"`
 }
 
 const (
