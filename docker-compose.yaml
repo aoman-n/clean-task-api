@@ -14,6 +14,8 @@ services:
       - DB_HOST=mysql
       - DB_PORT=3306
       - SIGNINGKEY=signingkey
+      - FRONT_ORIGIN=http://localhost:3000
+      - BFF_ORIGIN=http://front:3000
     ports:
       - "8080:8080"
     depends_on:
