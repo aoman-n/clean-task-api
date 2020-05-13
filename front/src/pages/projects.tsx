@@ -1,13 +1,27 @@
 import { NextPage, ExNextPageContext } from 'next'
+import Entrance from '~/components/templates/Entrance'
 import ProjectList from '~/components/organisms/ProjectList'
+import { fetchProjects } from '~/services/api/projects'
+import { redirect } from '~/routes'
+import { Project } from '~/services/model'
 
-const IndexPage: NextPage = () => {
-  return <ProjectList />
+const ProjectsPage: NextPage<{ projects: Project[] }> = ({ projects }) => {
+  return <Entrance content={<ProjectList projects={projects} />} />
 }
 
-IndexPage.getInitialProps = async (ctx: ExNextPageContext) => {
-  // 必要な情報をfetchする
-  console.log('ctx: ', ctx)
+ProjectsPage.getInitialProps = async (ctx: ExNextPageContext) => {
+  if (!ctx.auth.token) {
+    redirect(ctx.res, '/login')
+    return { projects: [] }
+  }
+
+  try {
+    const projects = await fetchProjects(ctx.auth.token)
+    return { projects }
+  } catch (e) {
+    console.log('fetchProjects error: ', e)
+    return { projects: [] as Project[] }
+  }
 }
 
-export default IndexPage
+export default ProjectsPage

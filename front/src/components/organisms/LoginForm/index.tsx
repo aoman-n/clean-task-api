@@ -1,6 +1,9 @@
-import React from 'react'
-import { Form, Input, Button, Checkbox } from 'antd'
+import React, { useState, useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { Form, Input, Button } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { loginApi } from '~/utils/api'
+import { login } from '~/auth'
 // import { useForm } from 'react-hook-form'
 
 type FormData = {
@@ -14,9 +17,30 @@ const initialValues: FormData = {
 }
 
 const LoginForm = () => {
-  const handleOnSubmit = (values: any) => {
-    console.log('handleOnSubmit value: ', values)
-  }
+  const router = useRouter()
+  const [data, setData] = useState<FormData>(initialValues)
+
+  const handleOnSubmit = useCallback(async () => {
+    console.log('handleOnSubmit value: ', data)
+    try {
+      const res = await loginApi(data)
+      console.log('res: ', res)
+      login({ token: res.token })
+      router.push('/projects')
+    } catch (e) {
+      console.log('エラーだよ！')
+    }
+  }, [data])
+
+  const onChangeInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setData({
+        ...data,
+        [e.target.name]: e.target.value,
+      })
+    },
+    [data],
+  )
 
   return (
     <Form
@@ -33,9 +57,11 @@ const LoginForm = () => {
         ]}
       >
         <Input
+          name="loginName"
           prefix={<UserOutlined className="site-form-item-icon" />}
           placeholder="LoginName"
           size="large"
+          onChange={onChangeInput}
         />
       </Form.Item>
       <Form.Item
@@ -46,21 +72,14 @@ const LoginForm = () => {
         ]}
       >
         <Input
+          name="password"
           prefix={<LockOutlined className="site-form-item-icon" />}
           type="password"
           placeholder="Password"
           size="large"
+          onChange={onChangeInput}
         />
       </Form.Item>
-      {/* <Form.Item>
-        <Form.Item name="remember" valuePropName="checked" noStyle>
-          <Checkbox>Remember me</Checkbox>
-        </Form.Item>
-
-        <a className="login-form-forgot" href="">
-          Forgot password
-        </a>
-      </Form.Item> */}
 
       <Form.Item>
         <Button

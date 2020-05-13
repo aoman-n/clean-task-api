@@ -1,29 +1,48 @@
 import axios from 'axios'
 
-const BASE_URL_ON_SERVER = 'http://api:8080/api/v1'
-const BASE_URL_ON_FRONT = 'http://localhost:8080/api/v1'
+const BASE_URL_ON_SERVER = 'http://api:8080'
+const BASE_URL_ON_FRONT = 'http://localhost:8080'
 
 const isServer = typeof window === 'undefined'
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   if (isServer) return BASE_URL_ON_SERVER
 
   return BASE_URL_ON_FRONT
 }
 
-// const errorHandler = (error: AxiosError): Error => {
-//   if (
-//     error.response?.status === 404 &&
-//     error.response.data.message === 'not initialized.'
-//   ) {
-//     Router.push('/initial')
-//   }
-//   return error
-// }
-
-const createAuthHeader = (token: string) => ({
+export const createAuthHeader = (token: string) => ({
   Authorization: `Bearer ${token}`,
 })
+
+/* Response Data Structure */
+export type Response<T> = {
+  message: string
+  data: T
+}
+
+interface Login {
+  id: string
+  token: string
+}
+
+export const loginApi = async (params: {
+  loginName: string
+  password: string
+}) => {
+  try {
+    const res = await axios.post<Response<Login>>(
+      `${getBaseUrl()}/login`,
+      params,
+    )
+
+    return res.data.data
+  } catch (e) {
+    console.log('e: ', e)
+
+    throw e
+  }
+}
 
 export const getPrivateMessage = async (token: string) => {
   return axios.get<{ message: string }>(`${getBaseUrl()}/private`, {
