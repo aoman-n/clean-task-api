@@ -1,9 +1,7 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"task-api/src/interfaces"
 	"task-api/src/interfaces/gateway"
 	"task-api/src/usecase"
@@ -77,17 +75,15 @@ func (uc *UserController) Singup(c interfaces.Context) {
 	c.JSON(200, "ok", OkRes{Id: id, Token: token})
 }
 
-// Params: loginName, password
-// Return: id, jwtToken
 func (uc *UserController) Login(c interfaces.Context) {
-	var input interactor.UserLoginInputDS
-	if err := c.Bind(&input); err != nil {
+	var req interactor.UserLoginInputDS
+	if err := c.Bind(&req); err != nil {
 		fmt.Println("failed to decode. err: ", err)
 		c.JSON(400, "bad request", nil)
 		return
 	}
 
-	userID, err := uc.UserInteractor.FindByLoginNameAndVerifyPassword(input)
+	userID, err := uc.UserInteractor.FindByLoginNameAndVerifyPassword(req)
 	if err != nil {
 		fmt.Println("in controller, user: ", userID)
 		c.JSON(500, "bad request", err.Error())
@@ -102,15 +98,4 @@ func (uc *UserController) Login(c interfaces.Context) {
 	}
 
 	c.JSON(200, "ok", OkRes{Id: userID, Token: token})
-}
-
-func jsonView(w http.ResponseWriter, code int, v interface{}) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf=8")
-	w.WriteHeader(code)
-	w.Write(b)
-	return nil
 }

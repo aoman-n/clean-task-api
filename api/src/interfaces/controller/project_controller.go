@@ -39,17 +39,17 @@ func (uc *ProjectController) Index(c interfaces.Context) {
 
 func (uc *ProjectController) Create(c interfaces.Context) {
 	uID := c.MustGet("userId").(int64)
-	var data interactor.ProjectStoreInputDS
-	data.UserID = uID
-	if err := c.Bind(&data); err != nil {
+	var req interactor.ProjectStoreInputDS
+	req.UserID = uID
+	if err := c.Bind(&req); err != nil {
 		fmt.Println("in project create, decode error: ", err)
 		c.JSON(500, err.Error(), nil)
 		return
 	}
 
-	fmt.Println("in project create. data: ", data)
+	fmt.Println("in project create. req: ", req)
 
-	projectID, err := uc.ProjectInteractor.Store(&data)
+	projectID, err := uc.ProjectInteractor.Store(&req)
 	if err != nil {
 		fmt.Println("in project create, store error: ", err)
 		code, msg := uc.errStatus(err)

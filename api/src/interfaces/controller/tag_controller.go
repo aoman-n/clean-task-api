@@ -30,8 +30,8 @@ func NewTagController(sqlhandler interfaces.SQLHandler, validator usecase.Valida
 
 func (con *TagController) Index(c interfaces.Context) {
 	projectID, _ := strconv.Atoi(c.Param("id"))
-	var data interactor.TagCreateInputDS
-	if err := c.Bind(&data); err != nil {
+	var req interactor.TagCreateInputDS
+	if err := c.Bind(&req); err != nil {
 		c.JSON(400, "bad request", nil)
 		return
 	}
@@ -48,14 +48,14 @@ func (con *TagController) Index(c interfaces.Context) {
 
 func (con *TagController) Create(c interfaces.Context) {
 	projectID, _ := strconv.Atoi(c.Param("id"))
-	var data interactor.TagCreateInputDS
-	if err := c.Bind(&data); err != nil {
+	var req interactor.TagCreateInputDS
+	if err := c.Bind(&req); err != nil {
 		c.JSON(400, "bad request", nil)
 		return
 	}
 
-	data.ProjectID = projectID
-	id, err := con.interactor.Create(&data)
+	req.ProjectID = projectID
+	id, err := con.interactor.Create(&req)
 	if err != nil {
 		fmt.Println("create tag error: ", err)
 		switch err.(type) {
@@ -73,15 +73,15 @@ func (con *TagController) Create(c interfaces.Context) {
 func (con *TagController) Update(c interfaces.Context) {
 	uID := c.MustGet("userId").(int64)
 	tagID, _ := strconv.Atoi(c.Param("id"))
-	var data interactor.TagUpdateInputDS
-	if err := c.Bind(&data); err != nil {
+	var req interactor.TagUpdateInputDS
+	if err := c.Bind(&req); err != nil {
 		c.JSON(400, "bad request", nil)
 		return
 	}
 
-	data.TagID = tagID
-	data.UserID = uID
-	tag, err := con.interactor.Update(&data)
+	req.TagID = tagID
+	req.UserID = uID
+	tag, err := con.interactor.Update(&req)
 	if err != nil {
 		code, msg := con.errStatus(err)
 		c.JSON(code, msg, nil)

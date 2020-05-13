@@ -43,14 +43,14 @@ func (con *taskController) Index(c interfaces.Context) {
 func (con *taskController) Create(c interfaces.Context) {
 	projectID, _ := strconv.Atoi(c.Param("id"))
 
-	var data interactor.TaskStoreInputDS
-	if err := c.Bind(&data); err != nil {
+	var req interactor.TaskStoreInputDS
+	if err := c.Bind(&req); err != nil {
 		c.JSON(400, "bad request", nil)
 		return
 	}
 
-	data.ProjectID = projectID
-	id, err := con.taskInteractor.Store(&data)
+	req.ProjectID = projectID
+	id, err := con.taskInteractor.Store(&req)
 	if err != nil {
 		fmt.Println("task usecase store error: ", err)
 		switch err.(type) {
@@ -68,15 +68,15 @@ func (con *taskController) Create(c interfaces.Context) {
 func (con *taskController) Update(c interfaces.Context) {
 	taskID, _ := strconv.Atoi(c.Param("task_id"))
 
-	var data interactor.TaskUpdateInputDS
-	if err := c.Bind(&data); err != nil {
-		fmt.Println("data decode error: ", err)
+	var req interactor.TaskUpdateInputDS
+	if err := c.Bind(&req); err != nil {
+		fmt.Println("req decode error: ", err)
 		c.JSON(400, err.Error(), nil)
 		return
 	}
 
-	data.TaskID = taskID
-	updatedTask, err := con.taskInteractor.Update(&data)
+	req.TaskID = taskID
+	updatedTask, err := con.taskInteractor.Update(&req)
 	if err != nil {
 		fmt.Println("task usecase update error: ", err)
 		switch err.(type) {
