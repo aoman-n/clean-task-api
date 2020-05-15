@@ -22,6 +22,7 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http
 	tagController := controller.NewTagController(sqlhandler, validator)
 
 	router := engine.New()
+	router.Group("/")
 
 	/* users API */
 	router.POST("/signup", userController.Singup)

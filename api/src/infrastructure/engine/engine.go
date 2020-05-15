@@ -31,33 +31,38 @@ func (h *handle) Dispatch(handlers []HandlerFunc) httprouter.Handle {
 }
 
 type Engine struct {
-	router *httprouter.Router
-	handle Handle
+	router    *httprouter.Router
+	handle    Handle
+	groupPath string
 }
 
 func New() *Engine {
 	router := httprouter.New()
 	handle := &handle{}
 
-	return &Engine{router, handle}
+	return &Engine{router, handle, ""}
 }
 
 type HandlerFunc func(c interfaces.Context)
 
+func (e *Engine) Group(path string) {
+	e.groupPath = path
+}
+
 func (e *Engine) GET(path string, handlers ...HandlerFunc) {
-	e.router.GET(path, e.handle.Dispatch(handlers))
+	e.router.GET(e.groupPath+path, e.handle.Dispatch(handlers))
 }
 
 func (e *Engine) POST(path string, handlers ...HandlerFunc) {
-	e.router.POST(path, e.handle.Dispatch(handlers))
+	e.router.POST(e.groupPath+path, e.handle.Dispatch(handlers))
 }
 
 func (e *Engine) PUT(path string, handlers ...HandlerFunc) {
-	e.router.PUT(path, e.handle.Dispatch(handlers))
+	e.router.PUT(e.groupPath+path, e.handle.Dispatch(handlers))
 }
 
 func (e *Engine) DELETE(path string, handlers ...HandlerFunc) {
-	e.router.DELETE(path, e.handle.Dispatch(handlers))
+	e.router.DELETE(e.groupPath+path, e.handle.Dispatch(handlers))
 }
 
 func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
