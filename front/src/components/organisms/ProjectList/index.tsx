@@ -1,17 +1,48 @@
 import React, { useState, useCallback } from 'react'
 import Link from 'next/link'
-import { PageHeader, Button, Descriptions, List, Avatar } from 'antd'
+import { PageHeader, Button, List } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
 import { AddProject } from '~/components/organisms/Modal'
 import { Project } from '~/services/model'
+import { fetchHello, fetchCookie } from '~/utils/api'
 
 interface ProjectListProps {
   projects: Project[]
 }
 
+const useHello = () => {
+  const handleHello = async () => {
+    try {
+      const res = await fetchHello()
+
+      console.log('res: ', res)
+    } catch (e) {
+      console.log('err: ', e)
+    }
+  }
+
+  return { handleHello }
+}
+
+const useCookie = () => {
+  const handleCookie = async () => {
+    try {
+      const res = await fetchCookie()
+
+      console.log('res: ', res)
+    } catch (e) {
+      console.log('err: ', e)
+    }
+  }
+
+  return { handleCookie }
+}
+
 const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
   const [visible, setVisible] = useState(false)
+  const { handleHello } = useHello()
+  const { handleCookie } = useCookie()
 
   const showModal = useCallback(() => {
     setVisible(true)
@@ -23,6 +54,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
 
   return (
     <Component>
+      <Button onClick={handleHello}>Cookie Sample</Button>
+      <Button onClick={handleCookie}>BFF へ</Button>
       <AddProject visible={visible} hideModal={hideModal} submit={() => {}} />
       <PageHeader
         ghost={false}

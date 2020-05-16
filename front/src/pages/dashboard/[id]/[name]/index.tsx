@@ -1,4 +1,5 @@
 import { NextPage, ExNextPageContext } from 'next'
+import Link from 'next/link'
 import { Layout, Breadcrumb, Button, Card } from 'antd'
 import { ProjectOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
@@ -31,9 +32,11 @@ const Dashboard: NextPage = () => {
       <Layout style={{ minHeight: '100vh' }}>
         <Layout>
           <StyledHeader style={{ zIndex: 1, width: '100%' }}>
-            <StyledButton ghost icon={<ProjectOutlined />}>
-              プロジェクトリスト
-            </StyledButton>
+            <Link href="/projects">
+              <StyledButton ghost icon={<ProjectOutlined />}>
+                プロジェクトリスト
+              </StyledButton>
+            </Link>
           </StyledHeader>
           <Content style={{ padding: '0 50px' }}>
             <Breadcrumb style={{ margin: '16px 0' }}>

@@ -97,5 +97,19 @@ func (uc *UserController) Login(c interfaces.Context) {
 		return
 	}
 
+	// Cookieにjwtをセット
+	c.SetCookie("jwt", token)
+
 	c.JSON(200, "ok", OkRes{Id: userID, Token: token})
+}
+
+func (uc *UserController) CookieSample(c interfaces.Context) {
+	jwt, err := c.GetCookie("jwt")
+	if err != nil {
+		c.JSON(500, "error", nil)
+		return
+	}
+
+	// TODO: jwtを返却しないように
+	c.JSON(200, "ok", map[string]string{"jwt": jwt})
 }

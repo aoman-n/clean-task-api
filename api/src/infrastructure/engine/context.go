@@ -82,3 +82,31 @@ func (c *Context) Header(key string) string {
 func (c *Context) Abort() {
 	c.enable = false
 }
+
+func (c *Context) SetCookie(name, value string) {
+	cookie := &http.Cookie{
+		Name:  name,
+		Value: value,
+		Path:  "/", // これがないと/apiに対してセットするためfrontサーバにcookieが送信されない
+		// Domain: "localhost:4000",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		// Secure: true, // localではfalseにしておく
+	}
+
+	http.SetCookie(c.w, cookie)
+}
+
+func (c *Context) GetCookie(name string) (string, error) {
+	cookie, err := c.r.Cookie(name)
+
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", nil
+		}
+
+		return "", err
+	}
+
+	return cookie.Value, nil
+}

@@ -10,4 +10,6 @@ type Context interface {
 	Query(key string) string
 	Header(key string) string
 	Abort()
+	SetCookie(name, value string)
+	GetCookie(name string) (string, error)
 }

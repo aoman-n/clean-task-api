@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const BASE_URL_ON_SERVER = 'http://api:8080'
-const BASE_URL_ON_FRONT = 'http://localhost:8080'
+const BASE_URL_ON_SERVER = 'http://api:8080/api'
+const BASE_URL_ON_FRONT = 'http://localhost:4000/api'
 
 const isServer = typeof window === 'undefined'
 
@@ -53,7 +53,17 @@ export const getPrivateMessage = async (token: string) => {
 }
 
 export const fetchHello = async () => {
-  const resp = await axios.get<{ message: string }>(`${getBaseUrl()}/hello`)
+  const resp = await axios.get<{ message: string }>(
+    `${getBaseUrl()}/cookie_sample`,
+  )
+
+  return resp.data
+}
+
+export const fetchCookie = async () => {
+  const resp = await axios.get<{ message: string }>(
+    `http://localhost:4000/cookie_sample`,
+  )
 
   return resp.data
 }

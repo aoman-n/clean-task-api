@@ -80,6 +80,7 @@ func (repo *taskRepository) FetchByProjectID(tx repository.Transaction, pID int)
 	}
 	defer rows.Close()
 
+	// TODO Nextでマッピングする処理をメソッド化
 	tasks := make([]*model.Task, 0)
 	for rows.Next() {
 		t := new(model.Task)

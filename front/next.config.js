@@ -11,6 +11,9 @@ const themeVariables = lessToJS(
 )
 
 module.exports = withLess(withCSS({
+  typescript: {
+    ignoreDevErrors: true,
+  },
   // for less settings
   lessLoaderOptions: {
     javascriptEnabled: true,
