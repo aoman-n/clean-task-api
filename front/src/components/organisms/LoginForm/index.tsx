@@ -3,8 +3,6 @@ import { useRouter } from 'next/router'
 import { Form, Input, Button } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { loginApi } from '~/utils/api'
-import { login } from '~/auth'
-// import { useForm } from 'react-hook-form'
 
 type FormData = {
   loginName: string
@@ -16,21 +14,19 @@ const initialValues: FormData = {
   password: '',
 }
 
-const LoginForm = () => {
+const useLoginForm = () => {
   const router = useRouter()
   const [data, setData] = useState<FormData>(initialValues)
 
   const handleOnSubmit = useCallback(async () => {
-    console.log('handleOnSubmit value: ', data)
     try {
-      const res = await loginApi(data)
-      console.log('res: ', res)
-      login({ token: res.token })
+      // ログイン成功したらcookieにjwtがセットされる
+      await loginApi(data)
       router.push('/projects')
     } catch (e) {
-      console.log('エラーだよ！')
+      console.log('login error: ', e)
     }
-  }, [data])
+  }, [data, router])
 
   const onChangeInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +37,12 @@ const LoginForm = () => {
     },
     [data],
   )
+
+  return { onChangeInput, handleOnSubmit }
+}
+
+const LoginForm = () => {
+  const { onChangeInput, handleOnSubmit } = useLoginForm()
 
   return (
     <Form

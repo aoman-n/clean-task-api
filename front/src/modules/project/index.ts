@@ -23,9 +23,12 @@ const projectModule = createSlice({
     select: (state: ProjectState, action: PayloadAction<number>) => {
       return { ...state, selected: action.payload }
     },
+    setTags: (state: ProjectState, action: PayloadAction<Tag[]>) => {
+      return { ...state, tags: action.payload }
+    },
   },
 })
 
-export const { setProjects, select } = projectModule.actions
+export const { setProjects, select, setTags } = projectModule.actions
 
 export default projectModule

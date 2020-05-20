@@ -3,8 +3,6 @@ import { Card } from 'antd'
 import TaskList from '~/components/organisms/TaskList'
 import TagList from '~/components/organisms/TagList'
 
-import { mockTags } from '~/services/mock'
-
 const tabList = [
   {
     key: 'task',
@@ -22,7 +20,7 @@ const tabList = [
 
 const contentList = {
   task: <TaskList />,
-  tag: <TagList tags={mockTags} />,
+  tag: <TagList />,
   member: <p>Members</p>,
 }
 

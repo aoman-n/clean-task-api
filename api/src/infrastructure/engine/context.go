@@ -33,7 +33,7 @@ func (c *Context) JSON(code int, msg string, data interface{}) {
 		c.error()
 		return
 	}
-	c.w.Header().Set("Content-Type", "application/json; charset=utf=8")
+	c.w.Header().Set("Content-Type", "application/json")
 	c.w.WriteHeader(code)
 	c.w.Write(b)
 }

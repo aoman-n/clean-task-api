@@ -30,15 +30,9 @@ func NewTagController(sqlhandler interfaces.SQLHandler, validator usecase.Valida
 
 func (con *TagController) Index(c interfaces.Context) {
 	projectID, _ := strconv.Atoi(c.Param("id"))
-	var req interactor.TagCreateInputDS
-	if err := c.Bind(&req); err != nil {
-		c.JSON(400, "bad request", nil)
-		return
-	}
 
 	tags, err := con.interactor.GetList(&interactor.TagGetListInputDS{ProjectID: projectID})
 	if err != nil {
-		fmt.Println("get tag list error: ", err)
 		c.JSON(500, "Internal server error", nil)
 		return
 	}
