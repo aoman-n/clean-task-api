@@ -2,8 +2,11 @@ import axios from 'axios'
 import { Response, getBaseUrl, createAuthHeader } from '~/utils/api'
 import { Task } from '~/services/model'
 
-export const fetchTasks = async (token: string, projectId: number) => {
-  const headers = createAuthHeader(token)
+export const fetchTasks = async (
+  projectId: number,
+  jwt: string | undefined,
+) => {
+  const headers = createAuthHeader(jwt)
 
   const res = await axios.get<Response<Task[]>>(
     `${getBaseUrl()}/projects/${projectId}/tasks`,

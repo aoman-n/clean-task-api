@@ -1,18 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
-export interface Task {
-  id: number
-  title: string
-  description: string
-}
+import { Project, Tag } from '~/services/model'
 
 export interface ProjectState {
-  list: Task[]
+  projects: Project[]
+  tags: Tag[]
   selected: number
 }
 
 export const projectInitialState: ProjectState = {
-  list: [],
+  projects: [],
+  tags: [],
   selected: 0,
 }
 
@@ -20,8 +17,8 @@ const projectModule = createSlice({
   name: 'project',
   initialState: projectInitialState,
   reducers: {
-    setTasks: (state: ProjectState, action: PayloadAction<Task[]>) => {
-      return { ...state, list: action.payload }
+    setProjects: (state: ProjectState, action: PayloadAction<Project[]>) => {
+      return { ...state, projects: action.payload }
     },
     select: (state: ProjectState, action: PayloadAction<number>) => {
       return { ...state, selected: action.payload }
@@ -29,6 +26,6 @@ const projectModule = createSlice({
   },
 })
 
-export const { setTasks, select } = projectModule.actions
+export const { setProjects, select } = projectModule.actions
 
 export default projectModule

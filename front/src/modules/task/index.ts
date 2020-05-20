@@ -2,12 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Task } from '~/services/model'
 
 export interface TaskState {
-  // tasks: { [key in string]: Task }
   tasks: Task[]
 }
 
 export const taskInitialState: TaskState = {
-  // tasks: {},
   tasks: [],
 }
 

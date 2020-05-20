@@ -6,13 +6,13 @@ import cookie from 'js-cookie'
 const AFTER_LOGIN_URL = '/'
 
 export interface Auth {
-  token?: string
   jwt?: string
 }
 
 export function loadAuthFromCookie(ctx: NextPageContext): Auth {
-  const { token, jwt } = parseCookies(ctx)
-  return { token, jwt }
+  // const { token, jwt } = parseCookies(ctx)
+  const { jwt } = parseCookies(ctx)
+  return { jwt }
 }
 
 export const login = ({ token }: { token: string }) => {

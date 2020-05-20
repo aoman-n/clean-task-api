@@ -1,4 +1,4 @@
-import { Project, Task } from '~/services/model'
+import { Project, Task, Tag } from '~/services/model'
 
 export const mockProjects: Project[] = [
   {
@@ -47,5 +47,28 @@ export const mockTasks: Task[] = [
     id: 4,
     name: 'Ant Design Title 4',
     status: 1,
+  },
+]
+
+export const mockTags: Tag[] = [
+  {
+    id: 1,
+    name: 'フロントエンド開発',
+    color: '#ffd700',
+  },
+  {
+    id: 2,
+    name: 'APIサーバー開発',
+    color: '#20b2aa',
+  },
+  {
+    id: 3,
+    name: 'デザイン',
+    color: '#ff1493',
+  },
+  {
+    id: 4,
+    name: 'インフラ構築',
+    color: '#696969',
   },
 ]

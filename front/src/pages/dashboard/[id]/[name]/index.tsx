@@ -1,82 +1,20 @@
 import { NextPage, ExNextPageContext } from 'next'
-import Link from 'next/link'
-import { Layout, Breadcrumb, Button, Card } from 'antd'
-import { ProjectOutlined } from '@ant-design/icons'
-import styled from 'styled-components'
-import TaskList from '~/components/organisms/TaskList'
+import Dashboard2 from '~/components/templates/Dashboard2'
+import Footer from '~/components/molcules/Footer'
+import MainContents from '~/components/organisms/MainContents'
 import { fetchTasks } from '~/services/api/tasks'
 import { redirect } from '~/routes'
 import { setTasks } from '~/modules/task'
-import { select } from '~/modules/projectModule'
-
-const { Header, Content, Footer } = Layout
-
-const tabList = [
-  {
-    key: 'task',
-    tab: 'タスク',
-  },
-  {
-    key: 'tag',
-    tab: 'タグ',
-  },
-  {
-    key: 'member',
-    tab: 'メンバー',
-  },
-]
+import { select } from '~/modules/project'
 
 const Dashboard: NextPage = () => {
   return (
-    <>
-      <Layout style={{ minHeight: '100vh' }}>
-        <Layout>
-          <StyledHeader style={{ zIndex: 1, width: '100%' }}>
-            <Link href="/projects">
-              <StyledButton ghost icon={<ProjectOutlined />}>
-                プロジェクトリスト
-              </StyledButton>
-            </Link>
-          </StyledHeader>
-          <Content style={{ padding: '0 50px' }}>
-            <Breadcrumb style={{ margin: '16px 0' }}>
-              <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
-              <Breadcrumb.Item>プロジェクト名</Breadcrumb.Item>
-            </Breadcrumb>
-            <LayoutContent>
-              <Card
-                tabList={tabList}
-                activeTabKey="task"
-                onTabChange={() => {}}
-                style={{ width: '100%' }}
-              >
-                <TaskList />
-              </Card>
-            </LayoutContent>
-          </Content>
-          <Footer style={{ textAlign: 'center' }}>
-            Ant Design ©2018 Created by Ant UED
-          </Footer>
-        </Layout>
-      </Layout>
-    </>
+    <Dashboard2 MainComponent={<MainContents />} FooterComponent={<Footer />} />
   )
 }
 
-const StyledHeader = styled(Header)`
-  background: #036aa7;
-`
-const StyledButton = styled(Button)`
-  font-weight: bold;
-`
-const LayoutContent = styled.div`
-  background: #fff;
-  padding: 24px;
-  min-height: 280px;
-`
-
 Dashboard.getInitialProps = async (ctx: ExNextPageContext) => {
-  if (!ctx.auth.token) {
+  if (!ctx.auth.jwt) {
     redirect(ctx.res, '/login')
     return
   }
@@ -85,7 +23,7 @@ Dashboard.getInitialProps = async (ctx: ExNextPageContext) => {
   ctx.store.dispatch(select(projectId))
 
   try {
-    const tasks = await fetchTasks(ctx.auth.token, projectId)
+    const tasks = await fetchTasks(projectId, ctx.auth.jwt)
 
     ctx.store.dispatch(setTasks(tasks))
     return

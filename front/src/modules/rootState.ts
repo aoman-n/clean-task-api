@@ -1,6 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit'
 import sampleModule, { SampleState } from './sampleModule'
-import projectModule, { ProjectState } from './projectModule'
+import projectModule, { ProjectState } from './project'
 import taskModule, { TaskState } from './task'
 import authModule, { AuthState } from './auth'
 

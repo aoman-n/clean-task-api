@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { List, Tag } from 'antd'
 import AddTask from './AddTask'
+import TagListModal from '~/components/organisms/TagListModal'
 import { Task } from '~/services/model'
 import { RootState } from '~/modules/rootState'
 

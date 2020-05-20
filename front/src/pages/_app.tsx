@@ -4,7 +4,7 @@ import App, { AppContext } from 'next/app'
 import Router, { useRouter } from 'next/router'
 import NProgress from 'nprogress'
 import { ThemeProvider } from 'styled-components'
-import { loadAuthFromCookie } from '~/auth'
+import { loadAuthFromCookie, Auth } from '~/auth'
 import theme from '~/theme'
 import { GlobalStyle } from '~/styles'
 import { Provider } from 'react-redux'
@@ -13,6 +13,7 @@ import withRedux from 'next-redux-wrapper'
 import { Store } from 'redux'
 import { RootState } from '~/modules/rootState'
 import { setToken } from '~/modules/auth'
+
 import 'antd/dist/antd.css'
 
 Router.events.on('routeChangeStart', (url) => {
@@ -51,9 +52,17 @@ type Props = {
 class MyApp extends App<Props> {
   static async getInitialProps({ Component, ctx }: AppContext) {
     let pageProps = {}
+    let auth: Auth = { jwt: undefined }
 
-    const auth = loadAuthFromCookie(ctx)
-    ctx.store.dispatch(setToken(String(auth.token)))
+    // サーバーで実行する時はcookieからjwtを取得
+    // フロントで実行する時はstoreからjwtを取得
+    if (ctx.req) {
+      auth = loadAuthFromCookie(ctx)
+      ctx.store.dispatch(setToken(auth.jwt))
+    } else {
+      const state: RootState = ctx.store.getState()
+      auth = { jwt: state.auth.jwt }
+    }
 
     if (Component.getInitialProps) {
       pageProps = await (Component as any).getInitialProps({ ...ctx, auth })

@@ -11,7 +11,7 @@ export const getBaseUrl = () => {
   return BASE_URL_ON_FRONT
 }
 
-export const createAuthHeader = (token: string) => ({
+export const createAuthHeader = (token: string | undefined) => ({
   Authorization: `Bearer ${token}`,
 })
 

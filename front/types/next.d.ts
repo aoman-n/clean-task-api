@@ -8,7 +8,8 @@ declare module 'next' {
     req?: Express.Request
     res?: Express.Response
     auth: {
-      token?: string
+      // token?: string
+      jwt?: string
     }
   }
 }
