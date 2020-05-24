@@ -6,9 +6,10 @@ RUN apt-get update && apt-get -y install default-mysql-client
 
 # development build
 FROM base as development
-ENV GO_ENV=development
+
 EXPOSE 8080
-RUN go mod download \
-    && go get github.com/oxequa/realize \
-    && go get bitbucket.org/liamstask/goose/cmd/goose
+RUN go mod download
+RUN GO111MODULE=off go get -u github.com/oxequa/realize && \
+    go get -u bitbucket.org/liamstask/goose/cmd/goose && \
+    go get -u github.com/kyoh86/richgo
 ENTRYPOINT ["sh", "./entrypoint.sh"]

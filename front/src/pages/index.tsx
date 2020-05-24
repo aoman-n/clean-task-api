@@ -1,8 +1,8 @@
 import { NextPage } from 'next'
 import Link from 'next/link'
 import { AppContext } from '~/components/AppContext'
-import { setTasks, Task } from '~/modules/projectModule'
-// import { RootState } from '~/modules/rootState'
+import { setTasks } from '~/modules/task'
+import { Task } from '~/services/model'
 
 const Index: NextPage<{ tasks: Task[] }> = ({ tasks }) => {
   return (
@@ -15,7 +15,7 @@ const Index: NextPage<{ tasks: Task[] }> = ({ tasks }) => {
       <ul>
         {tasks.map((t) => (
           <li key={t.id}>
-            {t.id}: {t.title} - {t.description}
+            {t.id}: {t.name}
           </li>
         ))}
       </ul>
@@ -31,18 +31,18 @@ Index.getInitialProps = async (ctx: AppContext) => {
   const tasks: Task[] = [
     {
       id: 1,
-      title: 'task1',
-      description: 'task1 description',
+      name: 'task1',
+      status: 1,
     },
     {
       id: 2,
-      title: 'task2',
-      description: 'task2 description',
+      name: 'task2',
+      status: 1,
     },
     {
       id: 3,
-      title: 'task3',
-      description: 'task3 description',
+      name: 'task3',
+      status: 1,
     },
   ]
 
