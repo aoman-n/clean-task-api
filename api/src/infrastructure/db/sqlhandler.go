@@ -10,7 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func NewSqlhandler() interfaces.SQLHandler {
+func NewSqlhandler() *SQLHandler {
 	db := connect()
 
 	return &SQLHandler{

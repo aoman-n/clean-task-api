@@ -12,6 +12,10 @@ import (
 	"github.com/rs/cors"
 )
 
+func HelloHandler(c interfaces.Context) {
+	c.JSON(200, "Hello, World", "data!")
+}
+
 func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http.Handler {
 
 	middleware := middleware.NewMiddlewre(sqlhandler)
@@ -23,6 +27,9 @@ func Handler(sqlhandler interfaces.SQLHandler, validator usecase.Validator) http
 
 	router := engine.New()
 	router.Group("/api")
+
+	/* hello API */
+	router.GET("/hello", HelloHandler)
 
 	/* users API */
 	router.POST("/signup", userController.Singup)

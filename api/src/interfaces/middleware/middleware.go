@@ -9,24 +9,24 @@ import (
 	"task-api/src/utils/auth"
 )
 
-type Middleware interface {
+type IMiddleware interface {
 	Auth(c interfaces.Context)
 	RequiredJoinedProject(c interfaces.Context)
 	RequiredWriteRole(c interfaces.Context)
 }
 
-type middleware struct {
+type Middleware struct {
 	midInteractor interactor.MiddlewareInteractor
 }
 
-func NewMiddlewre(sqlhandler interfaces.SQLHandler) Middleware {
+func NewMiddlewre(sqlhandler interfaces.SQLHandler) *Middleware {
 	userRepo := gateway.NewUserRepository(sqlhandler)
 	midInteractor := interactor.NewMiddlewareInteractor(userRepo)
 
-	return &middleware{midInteractor}
+	return &Middleware{midInteractor}
 }
 
-func (m *middleware) Auth(c interfaces.Context) {
+func (m *Middleware) Auth(c interfaces.Context) {
 	token := auth.GetTokenFromHeader(c.Header("Authorization"))
 	userId, err := auth.DecodeJWT(token)
 	if err != nil {
@@ -38,7 +38,7 @@ func (m *middleware) Auth(c interfaces.Context) {
 	c.Set("userId", userId)
 }
 
-func (m *middleware) RequiredJoinedProject(c interfaces.Context) {
+func (m *Middleware) RequiredJoinedProject(c interfaces.Context) {
 	uID := c.MustGet("userId").(int64)
 	pID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -63,7 +63,7 @@ func (m *middleware) RequiredJoinedProject(c interfaces.Context) {
 	return
 }
 
-func (m *middleware) RequiredWriteRole(c interfaces.Context) {
+func (m *Middleware) RequiredWriteRole(c interfaces.Context) {
 	uID := c.MustGet("userId").(int64)
 	pID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {

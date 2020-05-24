@@ -12,6 +12,14 @@ up:
 down:
 	$(COMPOSE) down
 
+.PHONY: logs
+ifeq (logs,$(firstword $(MAKECMDGOALS)))
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  $(eval $(RUN_ARGS):;@:)
+endif
+logs:
+	${COMPOSE_COMMAND} logs -f $(RUN_ARGS)
+
 .PHONY: migrate-create
 migrate-create:
 	$(COMPOSE) run --rm api goose create ${FILE_NAME} sql
